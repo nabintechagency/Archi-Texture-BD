@@ -4,7 +4,10 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>{{ config('app.name', 'Archi Texture') }}</title>
+        <title inertia>{{ config('app.name', 'ARCHI-TEXTURE') }}</title>
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/jpeg" href="/images/logo.jpg">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

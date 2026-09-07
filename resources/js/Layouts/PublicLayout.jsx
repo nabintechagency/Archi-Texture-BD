@@ -46,33 +46,35 @@ const navLinks = [
 ];
 
 function Wordmark({ settings = {}, light = false, isFooter = false }) {
-    const siteTitle = settings.site_title || settings.company_name || 'Archi Texture';
+    const rawTitle = settings.site_title || settings.company_name || 'ARCHI-TEXTURE';
+    const siteTitle = (rawTitle === 'Archi Texture' || !rawTitle) ? 'ARCHI-TEXTURE' : rawTitle;
     const siteTagline = settings.site_tagline || 'Interior Products Wholesale Showroom and Farm';
+    const logoSrc = settings.site_logo || settings.logo || '/images/logo.jpg';
 
     return (
         <Link
             href="/"
-            className={`inline-flex items-center ${isFooter ? 'gap-3 sm:gap-4' : 'gap-2.5 sm:gap-3.5'} min-w-0 max-w-full cursor-pointer select-none group`}
+            className={`inline-flex items-center ${isFooter ? 'gap-3.5 sm:gap-4.5' : 'gap-2 min-[380px]:gap-2.5 sm:gap-3.5'} min-w-0 max-w-full cursor-pointer select-none group`}
         >
             <div
-                className={`relative shrink-0 overflow-hidden rounded-lg sm:rounded-xl border border-bronze/30 shadow-xs transition-transform duration-200 group-hover:scale-105 bg-[#fab617] ${
+                className={`relative shrink-0 overflow-hidden transition-all duration-300 group-hover:scale-105 ${
                     isFooter
-                        ? 'h-12 min-[380px]:h-14 sm:h-16 md:h-20 aspect-[742/1024]'
-                        : 'h-9 sm:h-11 md:h-12 aspect-[742/1024]'
+                        ? 'h-12 min-[380px]:h-14 sm:h-16 md:h-20 aspect-[742/1024] bg-white p-1 rounded-xl shadow-lg border border-white/20'
+                        : 'h-8 min-[360px]:h-8.5 min-[400px]:h-9.5 sm:h-10 md:h-11 lg:h-12 aspect-[742/1024] bg-white rounded-lg sm:rounded-xl border border-sand/80 shadow-xs'
                 }`}
             >
                 <img
-                    src="/images/logo.jpg"
+                    src={logoSrc}
                     alt={`${siteTitle} Logo`}
                     className="h-full w-full object-contain pointer-events-none select-none"
                 />
             </div>
             <div className="flex flex-col min-w-0 justify-center">
                 <span
-                    className={`font-serif-display font-bold leading-tight ${
+                    className={`font-serif-display font-bold whitespace-nowrap ${
                         isFooter
-                            ? 'text-lg sm:text-xl md:text-2xl text-cream tracking-[0.04em] sm:tracking-[0.06em]'
-                            : `text-base sm:text-lg md:text-xl lg:text-[22px] tracking-[0.04em] sm:tracking-[0.06em] ${light ? 'text-cream' : 'text-charcoal'} truncate`
+                            ? 'text-lg sm:text-xl md:text-2xl text-cream tracking-[0.04em] sm:tracking-[0.06em] leading-tight'
+                            : `text-[15px] min-[360px]:text-base min-[400px]:text-lg sm:text-xl md:text-[22px] lg:text-[24px] tracking-[0.05em] sm:tracking-[0.08em] md:tracking-[0.1em] uppercase leading-none ${light ? 'text-cream' : 'text-charcoal'}`
                     }`}
                 >
                     {siteTitle}

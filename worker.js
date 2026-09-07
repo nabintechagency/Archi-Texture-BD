@@ -133,8 +133,8 @@ const PRODUCTS = [
 ];
 
 const SETTINGS = {
-    site_title: "Archi Texture",
-    company_name: "Archi Texture",
+    site_title: "ARCHI-TEXTURE",
+    company_name: "ARCHI-TEXTURE",
     site_tagline: "Interior Products Wholesale Showroom and Farm",
     contact_email: "contact@architexture.com",
     email: "contact@architexture.com",
