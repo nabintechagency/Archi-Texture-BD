@@ -1,0 +1,358 @@
+@import "@fontsource-variable/geist";
+@import "@fontsource/playfair-display/400.css";
+@import "@fontsource/playfair-display/500.css";
+@import "@fontsource/playfair-display/600.css";
+@import "@fontsource/playfair-display/700.css";
+@import "@fontsource/playfair-display/400-italic.css";
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Italiana&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 30 6% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 30 6% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 6% 10%;
+    --primary: 36 33% 50%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 38 33% 94%;
+    --secondary-foreground: 30 6% 12%;
+    --muted: 38 25% 93%;
+    --muted-foreground: 32 8% 42%;
+    --accent: 38 33% 92%;
+    --accent-foreground: 30 6% 12%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 35 18% 87%;
+    --input: 35 18% 87%;
+    --ring: 36 33% 50%;
+    --radius: 0.25rem;
+  }
+
+  .dark {
+    --background: 30 6% 9%;
+    --foreground: 40 20% 95%;
+    --card: 30 6% 12%;
+    --card-foreground: 40 20% 95%;
+    --popover: 30 6% 12%;
+    --popover-foreground: 40 20% 95%;
+    --primary: 36 33% 55%;
+    --primary-foreground: 30 6% 9%;
+    --secondary: 30 5% 16%;
+    --secondary-foreground: 40 20% 95%;
+    --muted: 30 5% 16%;
+    --muted-foreground: 36 8% 62%;
+    --accent: 30 5% 16%;
+    --accent-foreground: 40 20% 95%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 8% 100% / 10%;
+    --input: 30 8% 100% / 15%;
+    --ring: 36 33% 50%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "liga" 1;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  ::selection {
+    @apply bg-[#A98952] text-white;
+  }
+}
+
+@layer utilities {
+  .font-serif-display {
+    font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  }
+
+  .font-italiana {
+    font-family: "Italiana", "Playfair Display", Georgia, serif;
+  }
+
+  .font-cormorant {
+    font-family: "Cormorant Garamond", Georgia, serif;
+  }
+
+  .eyebrow {
+    @apply text-[11px] md:text-xs font-semibold uppercase tracking-[0.22em] text-[#A98952];
+  }
+
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-repeat: no-repeat;
+    background-position: left calc(100% - 2px);
+    transition: background-size 0.3s ease;
+  }
+
+  .link-underline:hover {
+    background-size: 100% 1px;
+  }
+}
+
+@keyframes marquee-left {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0%); }
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ken-burns {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.08); }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.7s ease-out forwards;
+}
+
+.animate-ken-burns {
+  animation: ken-burns 18s ease-out forwards;
+}
+
+.animate-marquee-notice {
+  display: flex;
+  width: max-content;
+  animation: marquee-left 32s linear infinite;
+}
+
+.animate-marquee-notice:hover {
+  animation-play-state: paused;
+}
+
+@keyframes char-sequential-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.9);
+    filter: blur(2px);
+  }
+  12%, 82% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+  92%, 100% {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.9);
+    filter: blur(2px);
+  }
+}
+
+/* ---------- Left-to-Right Wind Blowing Animations ---------- */
+@keyframes wind-drift-1 {
+  0% {
+    transform: translateX(-120%) translateY(0px) skewX(-14deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateX(15%) translateY(-20px) skewX(-8deg);
+    opacity: 0.85;
+  }
+  85% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(140%) translateY(-8px) skewX(-14deg);
+    opacity: 0;
+  }
+}
+
+@keyframes wind-drift-2 {
+  0% {
+    transform: translateX(-130%) translateY(8px) skewX(-20deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.75;
+  }
+  55% {
+    transform: translateX(25%) translateY(16px) skewX(-12deg);
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateX(150%) translateY(0px) skewX(-20deg);
+    opacity: 0;
+  }
+}
+
+@keyframes wind-drift-3 {
+  0% {
+    transform: translateX(-140%) translateY(-12px) skewX(-12deg);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.6;
+  }
+  60% {
+    transform: translateX(35%) translateY(-26px) skewX(-6deg);
+    opacity: 0.8;
+  }
+  85% {
+    opacity: 0.45;
+  }
+  100% {
+    transform: translateX(160%) translateY(-14px) skewX(-12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes wind-leaf-tumble-1 {
+  0% {
+    transform: translate(-10vw, 15vh) rotate(0deg) scale(0.6);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.85;
+  }
+  35% {
+    transform: translate(30vw, 8vh) rotate(140deg) scale(0.9);
+  }
+  65% {
+    transform: translate(70vw, 22vh) rotate(290deg) scale(1);
+    opacity: 0.85;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(115vw, 12vh) rotate(420deg) scale(0.7);
+    opacity: 0;
+  }
+}
+
+@keyframes wind-leaf-tumble-2 {
+  0% {
+    transform: translate(-10vw, 45vh) rotate(40deg) scale(0.5);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  40% {
+    transform: translate(35vw, 38vh) rotate(190deg) scale(0.85);
+  }
+  70% {
+    transform: translate(75vw, 52vh) rotate(340deg) scale(0.95);
+    opacity: 0.8;
+  }
+  92% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(115vw, 40vh) rotate(480deg) scale(0.6);
+    opacity: 0;
+  }
+}
+
+@keyframes wind-leaf-tumble-3 {
+  0% {
+    transform: translate(-10vw, 70vh) rotate(-20deg) scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.85;
+  }
+  45% {
+    transform: translate(45vw, 62vh) rotate(160deg) scale(0.9);
+  }
+  75% {
+    transform: translate(85vw, 76vh) rotate(320deg) scale(1);
+    opacity: 0.75;
+  }
+  95% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate(115vw, 65vh) rotate(460deg) scale(0.7);
+    opacity: 0;
+  }
+}
+
+@keyframes wind-particle-flow {
+  0% {
+    transform: translate(-10vw, 0px) scale(0.6);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate(50vw, -18px) scale(1.1);
+    opacity: 0.95;
+  }
+  90% {
+    opacity: 0.65;
+  }
+  100% {
+    transform: translate(115vw, -30px) scale(0.7);
+    opacity: 0;
+  }
+}
+
+@keyframes hero-wind-breeze {
+  0% {
+    transform: scale(1.06) translate3d(-1.5%, 0.5%, 0) skewX(0.5deg);
+  }
+  25% {
+    transform: scale(1.08) translate3d(1.2%, -0.8%, 0) skewX(-1.2deg);
+  }
+  50% {
+    transform: scale(1.09) translate3d(2.4%, 0.4%, 0) skewX(-1.8deg);
+  }
+  75% {
+    transform: scale(1.07) translate3d(0.8%, 1.2%, 0) skewX(-0.6deg);
+  }
+  100% {
+    transform: scale(1.06) translate3d(-1.5%, 0.5%, 0) skewX(0.5deg);
+  }
+}
+
+.animate-wind-1 {
+  animation: wind-drift-1 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-wind-2 {
+  animation: wind-drift-2 10s cubic-bezier(0.4, 0, 0.2, 1) infinite 2.5s;
+}
+
+.animate-wind-3 {
+  animation: wind-drift-3 13s cubic-bezier(0.4, 0, 0.2, 1) infinite 5s;
+}
+
+.animate-hero-breeze {
+  animation: hero-wind-breeze 14s ease-in-out infinite;
+}

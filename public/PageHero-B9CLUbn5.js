@@ -1,0 +1,6 @@
+import{c as l}from"./menu-FR6EAjE1.js";import{j as e}from"./app-Ba6n8WyU.js";/**
+ * @license lucide-react v1.31.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const c=[["path",{d:"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0",key:"1r0f0z"}],["circle",{cx:"12",cy:"10",r:"3",key:"ilqhr7"}]],r=l("map-pin",c);function o({eyebrow:t,title:s,description:a,children:x}){return e.jsxs("section",{className:"relative overflow-hidden bg-cream py-20 sm:py-28",children:[e.jsx("span",{className:"font-serif-display pointer-events-none absolute -right-6 -top-10 select-none text-[200px] italic leading-none text-bronze/10 md:text-[280px]",children:"d."}),e.jsx("div",{className:"mx-auto max-w-[1440px] px-4 md:px-16 lg:px-10",children:e.jsxs("div",{className:"max-w-3xl",children:[t&&e.jsx("p",{className:"eyebrow mb-3",children:t}),e.jsx("h1",{className:"font-serif-display text-4xl leading-tight text-charcoal sm:text-5xl md:text-6xl",children:s}),a&&e.jsx("p",{className:"mt-5 max-w-2xl text-lg leading-relaxed text-charcoal/60 md:text-xl",children:a}),x]})})]})}export{r as M,o as P};

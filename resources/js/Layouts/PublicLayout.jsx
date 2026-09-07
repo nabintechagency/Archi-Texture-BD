@@ -1,0 +1,432 @@
+import { Link, usePage } from '@inertiajs/react';
+import { useState, useEffect, useCallback } from 'react';
+import { Menu, X, Mail, ArrowUp, ChevronDown, Phone } from 'lucide-react';
+
+const FacebookIcon = ({ size = 17 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+    </svg>
+);
+
+const InstagramIcon = ({ size = 17 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+    </svg>
+);
+
+const YoutubeIcon = ({ size = 17 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+    </svg>
+);
+
+const PRODUCT_CATEGORIES = ['Furniture', 'Lighting', 'Decor', 'Textiles'];
+const PORTFOLIO_ROOMS = ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Office', 'Dining'];
+
+const navLinks = [
+    { label: 'Home', href: '/' },
+    {
+        label: 'Our Products',
+        href: '/products',
+        submenu: PRODUCT_CATEGORIES.map((cat) => ({
+            label: cat,
+            href: `/products?category=${encodeURIComponent(cat)}`,
+        })),
+    },
+    {
+        label: 'Portfolio',
+        href: '/portfolio',
+        submenu: PORTFOLIO_ROOMS.map((room) => ({
+            label: room,
+            href: `/portfolio?category=${encodeURIComponent(room)}`,
+        })),
+    },
+    { label: 'About Us', href: '/about' },
+    { label: 'Contact', href: '/contact' },
+];
+
+function Wordmark({ settings = {}, light = false, isFooter = false }) {
+    const siteTitle = settings.site_title || settings.company_name || 'Archi Texture';
+    const siteTagline = settings.site_tagline || 'Interior Products Wholesale Showroom and Farm';
+
+    return (
+        <Link
+            href="/"
+            className={`inline-flex items-center ${isFooter ? 'gap-3 sm:gap-4' : 'gap-2 sm:gap-3 md:gap-3.5'} min-w-0 max-w-full cursor-pointer select-none`}
+        >
+            <div
+                className={`relative shrink-0 overflow-hidden rounded-lg sm:rounded-xl border border-bronze/30 shadow-md transition-transform duration-200 hover:scale-105 bg-[#fab617] ${
+                    isFooter
+                        ? 'h-12 min-[380px]:h-14 sm:h-16 md:h-20 aspect-[742/1024]'
+                        : 'h-8 min-[380px]:h-9 sm:h-11 md:h-12 lg:h-13 aspect-[742/1024]'
+                }`}
+            >
+                <img
+                    src="/images/logo.jpg"
+                    alt={`${siteTitle} Logo`}
+                    className="h-full w-full object-contain pointer-events-none select-none"
+                />
+            </div>
+            <div className="flex flex-col min-w-0 justify-center">
+                <span
+                    className={`font-serif-display font-bold leading-tight ${
+                        isFooter
+                            ? 'text-lg sm:text-xl md:text-2xl text-cream tracking-[0.04em] sm:tracking-[0.06em]'
+                            : `text-sm min-[380px]:text-base sm:text-lg md:text-xl lg:text-[22px] tracking-[0.04em] sm:tracking-[0.07em] ${light ? 'text-cream' : 'text-charcoal'} truncate`
+                    }`}
+                >
+                    {siteTitle}
+                </span>
+                <span
+                    className={`uppercase font-semibold leading-relaxed sm:leading-tight ${
+                        isFooter
+                            ? 'text-[8.5px] min-[380px]:text-[9px] sm:text-[10px] md:text-[11px] tracking-[0.12em] sm:tracking-[0.18em] text-bronze-light mt-1 max-w-xs'
+                            : `text-[6.5px] min-[380px]:text-[7.5px] sm:text-[8.5px] md:text-[9.5px] tracking-[0.1em] min-[380px]:tracking-[0.14em] sm:tracking-[0.2em] max-w-[170px] min-[380px]:max-w-[210px] min-[480px]:max-w-[280px] sm:max-w-none mt-0.5 sm:mt-1 truncate ${light ? 'text-bronze-light' : 'text-bronze'}`
+                    }`}
+                >
+                    {siteTagline}
+                </span>
+            </div>
+        </Link>
+    );
+}
+
+function TypewriterNotice() {
+    const fullText = "Interior Products Wholesale Showroom & Farm";
+    const bronzeStart = 38; // "Farm" begins at index 38
+    const [displayText, setDisplayText] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    useEffect(() => {
+        let timeout;
+        if (!isDeleting && displayText.length < fullText.length) {
+            timeout = setTimeout(() => {
+                setDisplayText(fullText.slice(0, displayText.length + 1));
+            }, 60);
+        } else if (!isDeleting && displayText.length === fullText.length) {
+            timeout = setTimeout(() => {
+                setIsDeleting(true);
+            }, 3000);
+        } else if (isDeleting && displayText.length > 0) {
+            timeout = setTimeout(() => {
+                setDisplayText(fullText.slice(0, displayText.length - 1));
+            }, 28);
+        } else if (isDeleting && displayText.length === 0) {
+            timeout = setTimeout(() => {
+                setIsDeleting(false);
+            }, 400);
+        }
+        return () => clearTimeout(timeout);
+    }, [displayText, isDeleting]);
+
+    const prefixPart = displayText.slice(0, Math.min(displayText.length, bronzeStart));
+    const bronzePart = displayText.length > bronzeStart ? displayText.slice(bronzeStart) : '';
+
+    return (
+        <div className="w-full bg-[#1D1C1A] py-2.5 border-b border-white/[0.06] overflow-hidden">
+            <div className="mx-auto flex w-full max-w-[1440px] items-center justify-center px-4">
+                <p className="flex items-center justify-center text-center text-[10.5px] uppercase tracking-[0.2em] sm:text-[11px] md:text-xs font-medium text-cream/90 min-h-[22px] whitespace-pre">
+                    <span>{prefixPart}</span>
+                    {bronzePart && (
+                        <span className="text-bronze-light font-semibold">{bronzePart}</span>
+                    )}
+                </p>
+            </div>
+        </div>
+    );
+}
+
+export default function PublicLayout({ children, settings = {} }) {
+    const { url } = usePage();
+    const [scrolled, setScrolled] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [openSub, setOpenSub] = useState(null);
+    const [showScrollTop, setShowScrollTop] = useState(false);
+
+    useEffect(() => {
+        const onScroll = () => {
+            setShowScrollTop(window.scrollY > 400);
+            setScrolled(window.scrollY > 50);
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
+    const scrollToTop = useCallback(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
+    const isHome = url === '/' || url === '' || url.startsWith('/?');
+
+    return (
+        <div className="min-h-screen bg-white font-sans text-charcoal antialiased selection:bg-bronze selection:text-white">
+            {/* Announcement Bar - One by One Character Sequential Animation */}
+            <TypewriterNotice />
+
+            {/* Navigation */}
+            <header className={`group relative sticky top-0 z-[61] w-full ${scrolled ? 'bg-white shadow-[0_1px_20px_rgba(29,28,26,0.08)]' : 'bg-white/95 backdrop-blur-sm'}`}>
+                <div className="mx-auto max-w-[1440px] px-4 md:px-10">
+                    <div className="flex h-[76px] sm:h-20 items-center justify-between">
+                        <Wordmark settings={settings} />
+
+                        <nav className="hidden items-center gap-2 lg:flex">
+                            {navLinks.map(({ label, href, submenu }) => {
+                                const isCurrent = url === href || (href !== '/' && url.startsWith(href));
+                                return submenu ? (
+                                    <div key={href} className="group/item relative flex items-center py-2">
+                                        <a
+                                            href={href}
+                                            className={`px-3.5 py-2 text-[13px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ${
+                                                isCurrent
+                                                    ? 'text-bronze font-bold'
+                                                    : 'text-charcoal/80 hover:text-bronze'
+                                            }`}
+                                        >
+                                            {label}
+                                        </a>
+
+                                        {/* Dropdown */}
+                                        <div className="invisible absolute left-1/2 top-full z-50 -translate-x-1/2 pt-3 opacity-0 transition-all duration-200 group-hover/item:visible group-hover/item:opacity-100">
+                                            <div className="min-w-[190px] rounded-lg border-t-2 border-bronze bg-white py-2 shadow-[0_12px_35px_rgba(29,28,26,0.18)]">
+                                                {submenu.map((item) => (
+                                                    <a
+                                                        key={item.label}
+                                                        href={item.href}
+                                                        className="block px-5 py-2.5 text-[12px] font-semibold uppercase tracking-[0.12em] text-charcoal/80 transition-colors hover:bg-cream hover:text-bronze"
+                                                    >
+                                                        {item.label}
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <a
+                                        key={href}
+                                        href={href}
+                                        className={`px-3.5 py-2 text-[13px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ${
+                                            isCurrent
+                                                ? 'text-bronze font-bold'
+                                                : 'text-charcoal/80 hover:text-bronze'
+                                        }`}
+                                    >
+                                        {label}
+                                    </a>
+                                );
+                            })}
+                        </nav>
+
+                        <div className="flex items-center gap-3">
+                            <a
+                                href="/contact"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hidden rounded-[8px] border border-charcoal/30 bg-transparent px-6 py-2.5 text-[13px] font-semibold uppercase tracking-[0.14em] text-charcoal opacity-0 pointer-events-none transition-opacity duration-300 group-hover:opacity-100 group-hover:pointer-events-auto hover:border-black hover:bg-black hover:text-white sm:inline-flex"
+                            >
+                                Get Started
+                            </a>
+                            <button
+                                className="text-charcoal lg:hidden"
+                                onClick={() => setMobileOpen(!mobileOpen)}
+                                aria-label="Toggle menu"
+                            >
+                                {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Mobile Nav */}
+                {mobileOpen && (
+                    <div className="border-t border-sand bg-white lg:hidden">
+                        <nav className="space-y-0.5 px-4 py-3">
+                            {navLinks.map(({ label, href, submenu }) =>
+                                submenu ? (
+                                    <div key={href}>
+                                        <div className="flex items-center justify-between">
+                                            <a
+                                                href={href}
+                                                onClick={() => setMobileOpen(false)}
+                                                className={`flex-1 rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
+                                                    url === href || (href !== '/' && url.startsWith(href))
+                                                        ? 'bg-cream text-bronze'
+                                                        : 'text-charcoal/80 hover:bg-cream'
+                                                }`}
+                                            >
+                                                {label}
+                                            </a>
+                                            <button
+                                                onClick={() => setOpenSub(openSub === href ? null : href)}
+                                                aria-label={`Toggle ${label} subcategories`}
+                                                className="px-3 py-2.5 text-xs uppercase tracking-wider text-charcoal/50 hover:text-bronze"
+                                            >
+                                                {openSub === href ? 'Hide' : 'View'}
+                                            </button>
+                                        </div>
+                                        {openSub === href && (
+                                            <div className="mb-1 ml-4 mt-0.5 space-y-0.5 border-l-2 border-bronze/40 pl-3">
+                                                {submenu.map((item) => (
+                                                    <a
+                                                        key={item.label}
+                                                        href={item.href}
+                                                        onClick={() => setMobileOpen(false)}
+                                                        className="block rounded-md px-3 py-2 text-[13px] uppercase tracking-[0.12em] text-charcoal/60 hover:bg-cream hover:text-bronze"
+                                                    >
+                                                        {item.label}
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <a
+                                        key={href}
+                                        href={href}
+                                        onClick={() => setMobileOpen(false)}
+                                        className={`block rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
+                                            url === href || (href !== '/' && url.startsWith(href))
+                                                ? 'bg-cream text-bronze'
+                                                : 'text-charcoal/80 hover:bg-cream'
+                                        }`}
+                                    >
+                                        {label}
+                                    </a>
+                                )
+                            )}
+                            <a
+                                href="/contact"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => setMobileOpen(false)}
+                                className="mt-2 block rounded-full border border-charcoal/25 bg-transparent px-4 py-3 text-center text-sm font-semibold uppercase tracking-[0.14em] text-charcoal/80 opacity-80 hover:opacity-100 hover:border-black hover:bg-black hover:text-white transition-all"
+                            >
+                                Get Started
+                            </a>
+                        </nav>
+                    </div>
+                )}
+            </header>
+
+            {/* Main */}
+            <main>{children}</main>
+
+            {/* Footer */}
+            <footer className="bg-charcoal text-cream">
+                <div className="mx-auto max-w-[1440px] px-4 sm:px-6 md:px-10 py-12 sm:py-16 md:py-20">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12">
+                        {/* Brand Column */}
+                        <div className="space-y-5 sm:space-y-6">
+                            <Wordmark settings={settings} light isFooter />
+                            
+                            <p className="text-xs sm:text-[13px] leading-relaxed text-cream/65 max-w-sm">
+                                Interior products wholesale showroom and farm, curating bespoke furniture, artisan lighting, and architectural elements.
+                            </p>
+
+                            {/* Join Our Community */}
+                            <div className="pt-1">
+                                <h3 className="mb-3 sm:mb-4 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.16em] sm:tracking-[0.2em] text-cream/50">
+                                    Join Our Community
+                                </h3>
+                                <div className="flex items-center gap-2.5 sm:gap-3">
+                                    {[
+                                        { key: 'facebook_url', label: 'Facebook', Icon: FacebookIcon },
+                                        { key: 'instagram_url', label: 'Instagram', Icon: InstagramIcon },
+                                        { key: 'youtube_url', label: 'YouTube', Icon: YoutubeIcon },
+                                    ].map(({ key, label, Icon }) => (
+                                        <a
+                                            key={key}
+                                            href={settings[key] || '#'}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            aria-label={label}
+                                            className="rounded-full border border-cream/15 p-2 sm:p-2.5 text-cream/60 transition-all duration-300 hover:border-bronze hover:bg-bronze hover:text-white"
+                                        >
+                                            <Icon size={16} />
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        {/* Explore */}
+                        <div>
+                            <h3 className="font-serif-display mb-4 sm:mb-6 text-base sm:text-lg md:text-xl text-cream tracking-[0.02em]">Explore</h3>
+                            <ul className="grid grid-cols-2 gap-x-4 sm:gap-x-6 gap-y-2.5 sm:gap-y-3">
+                                {navLinks.map(({ label, href }) => (
+                                    <li key={href}>
+                                        <a href={href} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light inline-block py-0.5">
+                                            {label}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Our Products */}
+                        <div>
+                            <h3 className="font-serif-display mb-4 sm:mb-6 text-base sm:text-lg md:text-xl text-cream tracking-[0.02em]">Our Products</h3>
+                            <ul className="space-y-2.5 sm:space-y-3">
+                                {['Bespoke Furniture', 'Architectural Lighting', 'Handcrafted Rugs & Textiles', 'Sculptural Ceramic & Decor'].map((label) => (
+                                    <li key={label}>
+                                        <a href="/products" className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light inline-block py-0.5">
+                                            {label}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Contact */}
+                        <div>
+                            <h3 className="font-serif-display mb-4 sm:mb-6 text-base sm:text-lg md:text-xl text-cream tracking-[0.02em]">Contact</h3>
+                            <a
+                                href="/contact"
+                                className="inline-flex w-full sm:w-auto items-center justify-center rounded-[8px] border border-bronze px-6 sm:px-7 py-2.5 text-[11px] sm:text-[12px] font-medium uppercase tracking-[0.14em] sm:tracking-[0.16em] text-bronze-light transition-all duration-300 hover:bg-bronze hover:text-white"
+                            >
+                                Start Your Project
+                            </a>
+                            <ul className="mt-5 sm:mt-6 space-y-3.5 sm:space-y-4">
+                                <li className="flex items-start gap-3">
+                                    <Phone size={15} className="mt-0.5 shrink-0 text-bronze" />
+                                    <a href={`tel:${(settings.phone || settings.contact_phone || '01626778573').replace(/[^0-9+]/g, '')}`} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light break-words">
+                                        {settings.phone || settings.contact_phone || '01626778573'}
+                                    </a>
+                                </li>
+                                {(settings.email || settings.contact_email || 'contact@architexture.com') && (
+                                    <li className="flex items-start gap-3">
+                                        <Mail size={15} className="mt-0.5 shrink-0 text-bronze" />
+                                        <a href={`mailto:${settings.email || settings.contact_email || 'contact@architexture.com'}`} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light break-all sm:break-words">
+                                            {settings.email || settings.contact_email || 'contact@architexture.com'}
+                                        </a>
+                                    </li>
+                                )}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="border-t border-cream/10">
+                    <div className="mx-auto flex max-w-[1440px] flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 px-4 sm:px-6 md:px-10 py-5 sm:py-6">
+                        <p className="text-[11px] sm:text-xs text-cream/45 text-center sm:text-left">
+                            &copy; {new Date().getFullYear()} {settings.site_title || settings.company_name || 'Archi Texture'}. All rights reserved.
+                        </p>
+                        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+                            <a href="#" className="text-[11px] sm:text-xs text-cream/45 transition-colors hover:text-cream/75">Privacy Policy</a>
+                            <a href="#" className="text-[11px] sm:text-xs text-cream/45 transition-colors hover:text-cream/75">Terms of Service</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+
+            {/* Scroll to Top */}
+            {showScrollTop && (
+                <button
+                    onClick={scrollToTop}
+                    aria-label="Scroll to top"
+                    className="fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-charcoal text-cream shadow-lg transition-all duration-300 hover:bg-bronze"
+                >
+                    <ArrowUp size={17} />
+                </button>
+            )}
+        </div>
+    );
+}
