@@ -52,13 +52,13 @@ function Wordmark({ settings = {}, light = false, isFooter = false }) {
     return (
         <Link
             href="/"
-            className={`inline-flex items-center ${isFooter ? 'gap-3 sm:gap-4' : 'gap-2 sm:gap-3 md:gap-3.5'} min-w-0 max-w-full cursor-pointer select-none`}
+            className={`inline-flex items-center ${isFooter ? 'gap-3 sm:gap-4' : 'gap-2.5 sm:gap-3.5'} min-w-0 max-w-full cursor-pointer select-none group`}
         >
             <div
-                className={`relative shrink-0 overflow-hidden rounded-lg sm:rounded-xl border border-bronze/30 shadow-md transition-transform duration-200 hover:scale-105 bg-[#fab617] ${
+                className={`relative shrink-0 overflow-hidden rounded-lg sm:rounded-xl border border-bronze/30 shadow-xs transition-transform duration-200 group-hover:scale-105 bg-[#fab617] ${
                     isFooter
                         ? 'h-12 min-[380px]:h-14 sm:h-16 md:h-20 aspect-[742/1024]'
-                        : 'h-8 min-[380px]:h-9 sm:h-11 md:h-12 lg:h-13 aspect-[742/1024]'
+                        : 'h-9 sm:h-11 md:h-12 aspect-[742/1024]'
                 }`}
             >
                 <img
@@ -72,67 +72,20 @@ function Wordmark({ settings = {}, light = false, isFooter = false }) {
                     className={`font-serif-display font-bold leading-tight ${
                         isFooter
                             ? 'text-lg sm:text-xl md:text-2xl text-cream tracking-[0.04em] sm:tracking-[0.06em]'
-                            : `text-sm min-[380px]:text-base sm:text-lg md:text-xl lg:text-[22px] tracking-[0.04em] sm:tracking-[0.07em] ${light ? 'text-cream' : 'text-charcoal'} truncate`
+                            : `text-base sm:text-lg md:text-xl lg:text-[22px] tracking-[0.04em] sm:tracking-[0.06em] ${light ? 'text-cream' : 'text-charcoal'} truncate`
                     }`}
                 >
                     {siteTitle}
                 </span>
-                <span
-                    className={`uppercase font-semibold leading-relaxed sm:leading-tight ${
-                        isFooter
-                            ? 'text-[8.5px] min-[380px]:text-[9px] sm:text-[10px] md:text-[11px] tracking-[0.12em] sm:tracking-[0.18em] text-bronze-light mt-1 max-w-xs'
-                            : `text-[6.5px] min-[380px]:text-[7.5px] sm:text-[8.5px] md:text-[9.5px] tracking-[0.1em] min-[380px]:tracking-[0.14em] sm:tracking-[0.2em] max-w-[170px] min-[380px]:max-w-[210px] min-[480px]:max-w-[280px] sm:max-w-none mt-0.5 sm:mt-1 truncate ${light ? 'text-bronze-light' : 'text-bronze'}`
-                    }`}
-                >
-                    {siteTagline}
-                </span>
+                {isFooter && (
+                    <span
+                        className="uppercase font-semibold leading-relaxed sm:leading-tight text-[8.5px] min-[380px]:text-[9px] sm:text-[10px] md:text-[11px] tracking-[0.12em] sm:tracking-[0.18em] text-bronze-light mt-1 max-w-xs"
+                    >
+                        {siteTagline}
+                    </span>
+                )}
             </div>
         </Link>
-    );
-}
-
-function TypewriterNotice() {
-    const fullText = "Interior Products Wholesale Showroom & Farm";
-    const bronzeStart = 38; // "Farm" begins at index 38
-    const [displayText, setDisplayText] = useState('');
-    const [isDeleting, setIsDeleting] = useState(false);
-
-    useEffect(() => {
-        let timeout;
-        if (!isDeleting && displayText.length < fullText.length) {
-            timeout = setTimeout(() => {
-                setDisplayText(fullText.slice(0, displayText.length + 1));
-            }, 60);
-        } else if (!isDeleting && displayText.length === fullText.length) {
-            timeout = setTimeout(() => {
-                setIsDeleting(true);
-            }, 3000);
-        } else if (isDeleting && displayText.length > 0) {
-            timeout = setTimeout(() => {
-                setDisplayText(fullText.slice(0, displayText.length - 1));
-            }, 28);
-        } else if (isDeleting && displayText.length === 0) {
-            timeout = setTimeout(() => {
-                setIsDeleting(false);
-            }, 400);
-        }
-        return () => clearTimeout(timeout);
-    }, [displayText, isDeleting]);
-
-    const prefixPart = displayText.slice(0, Math.min(displayText.length, bronzeStart));
-    const bronzePart = displayText.length > bronzeStart ? displayText.slice(bronzeStart) : '';
-
-    return (
-        <div className="w-full bg-[#1D1C1A] py-2.5 border-b border-white/[0.06] overflow-hidden">
-            <div className="mx-auto flex w-full max-w-[1440px] items-center justify-center px-4">
-                <p className="flex items-center justify-center text-center text-[10.5px] uppercase tracking-[0.2em] sm:text-[11px] md:text-xs font-medium text-cream/90 min-h-[22px] whitespace-pre">
-                    <span>{prefixPart}</span>
-                    {bronzePart && (
-                        <span className="text-bronze-light font-semibold">{bronzePart}</span>
-                    )}
-                </p>
-            </div>
-        </div>
     );
 }
 
@@ -160,34 +113,39 @@ export default function PublicLayout({ children, settings = {} }) {
 
     return (
         <div className="min-h-screen bg-white font-sans text-charcoal antialiased selection:bg-bronze selection:text-white">
-            {/* Announcement Bar - One by One Character Sequential Animation */}
-            <TypewriterNotice />
-
-            {/* Navigation */}
-            <header className={`group relative sticky top-0 z-[61] w-full ${scrolled ? 'bg-white shadow-[0_1px_20px_rgba(29,28,26,0.08)]' : 'bg-white/95 backdrop-blur-sm'}`}>
-                <div className="mx-auto max-w-[1440px] px-4 md:px-10">
-                    <div className="flex h-[76px] sm:h-20 items-center justify-between">
+            {/* Top Navigation */}
+            <header
+                className={`group relative sticky top-0 z-[61] w-full transition-all duration-300 ${
+                    scrolled
+                        ? 'bg-white/95 backdrop-blur-md shadow-[0_2px_20px_rgba(29,28,26,0.08)]'
+                        : 'bg-white/95 backdrop-blur-sm border-b border-sand/40'
+                }`}
+            >
+                <div className="mx-auto max-w-[1440px] px-4 sm:px-6 md:px-10">
+                    <div className="flex h-16 sm:h-20 items-center justify-between gap-4">
                         <Wordmark settings={settings} />
 
-                        <nav className="hidden items-center gap-2 lg:flex">
+                        {/* Desktop Navigation Links */}
+                        <nav className="hidden items-center gap-1 xl:gap-2 lg:flex">
                             {navLinks.map(({ label, href, submenu }) => {
                                 const isCurrent = url === href || (href !== '/' && url.startsWith(href));
                                 return submenu ? (
                                     <div key={href} className="group/item relative flex items-center py-2">
                                         <a
                                             href={href}
-                                            className={`px-3.5 py-2 text-[13px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ${
+                                            className={`inline-flex items-center gap-1 px-3 py-2 text-[12px] xl:text-[13px] font-semibold uppercase tracking-[0.12em] xl:tracking-[0.14em] transition-colors duration-200 ${
                                                 isCurrent
                                                     ? 'text-bronze font-bold'
                                                     : 'text-charcoal/80 hover:text-bronze'
                                             }`}
                                         >
-                                            {label}
+                                            <span>{label}</span>
+                                            <ChevronDown size={13} className="transition-transform duration-200 group-hover/item:rotate-180 opacity-60" />
                                         </a>
 
                                         {/* Dropdown */}
-                                        <div className="invisible absolute left-1/2 top-full z-50 -translate-x-1/2 pt-3 opacity-0 transition-all duration-200 group-hover/item:visible group-hover/item:opacity-100">
-                                            <div className="min-w-[190px] rounded-lg border-t-2 border-bronze bg-white py-2 shadow-[0_12px_35px_rgba(29,28,26,0.18)]">
+                                        <div className="invisible absolute left-1/2 top-full z-50 -translate-x-1/2 pt-2 opacity-0 transition-all duration-200 group-hover/item:visible group-hover/item:opacity-100">
+                                            <div className="min-w-[200px] rounded-xl border border-sand/60 bg-white py-2 shadow-[0_14px_35px_rgba(29,28,26,0.14)] overflow-hidden">
                                                 {submenu.map((item) => (
                                                     <a
                                                         key={item.label}
@@ -204,7 +162,7 @@ export default function PublicLayout({ children, settings = {} }) {
                                     <a
                                         key={href}
                                         href={href}
-                                        className={`px-3.5 py-2 text-[13px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ${
+                                        className={`px-3 py-2 text-[12px] xl:text-[13px] font-semibold uppercase tracking-[0.12em] xl:tracking-[0.14em] transition-colors duration-200 ${
                                             isCurrent
                                                 ? 'text-bronze font-bold'
                                                 : 'text-charcoal/80 hover:text-bronze'
@@ -216,63 +174,70 @@ export default function PublicLayout({ children, settings = {} }) {
                             })}
                         </nav>
 
-                        <div className="flex items-center gap-3">
+                        {/* CTA Button & Mobile Hamburger */}
+                        <div className="flex items-center gap-2.5 sm:gap-3">
                             <a
                                 href="/contact"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="hidden rounded-[8px] border border-charcoal/30 bg-transparent px-6 py-2.5 text-[13px] font-semibold uppercase tracking-[0.14em] text-charcoal opacity-0 pointer-events-none transition-opacity duration-300 group-hover:opacity-100 group-hover:pointer-events-auto hover:border-black hover:bg-black hover:text-white sm:inline-flex"
+                                className="hidden sm:inline-flex items-center justify-center rounded-lg border border-charcoal/30 bg-transparent px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-[12.5px] font-semibold uppercase tracking-[0.12em] sm:tracking-[0.14em] text-charcoal transition-all duration-200 hover:border-black hover:bg-black hover:text-white"
                             >
                                 Get Started
                             </a>
+
                             <button
-                                className="text-charcoal lg:hidden"
+                                className="inline-flex lg:hidden items-center justify-center p-2 rounded-lg text-charcoal hover:bg-cream transition-colors"
                                 onClick={() => setMobileOpen(!mobileOpen)}
                                 aria-label="Toggle menu"
+                                aria-expanded={mobileOpen}
                             >
-                                {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+                                {mobileOpen ? <X size={22} /> : <Menu size={22} />}
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Mobile Nav */}
+                {/* Responsive Mobile Drawer */}
                 {mobileOpen && (
-                    <div className="border-t border-sand bg-white lg:hidden">
-                        <nav className="space-y-0.5 px-4 py-3">
+                    <div className="border-t border-sand/60 bg-white/98 backdrop-blur-md shadow-xl lg:hidden max-h-[calc(100vh-64px)] overflow-y-auto">
+                        <nav className="space-y-1 px-4 py-4 sm:px-6">
                             {navLinks.map(({ label, href, submenu }) =>
                                 submenu ? (
-                                    <div key={href}>
-                                        <div className="flex items-center justify-between">
+                                    <div key={href} className="rounded-lg overflow-hidden">
+                                        <div className="flex items-center justify-between rounded-lg hover:bg-cream transition-colors">
                                             <a
                                                 href={href}
                                                 onClick={() => setMobileOpen(false)}
-                                                className={`flex-1 rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
+                                                className={`flex-1 px-3.5 py-3 text-sm font-semibold uppercase tracking-[0.1em] transition-colors ${
                                                     url === href || (href !== '/' && url.startsWith(href))
-                                                        ? 'bg-cream text-bronze'
-                                                        : 'text-charcoal/80 hover:bg-cream'
+                                                        ? 'text-bronze font-bold'
+                                                        : 'text-charcoal/85'
                                                 }`}
                                             >
                                                 {label}
                                             </a>
                                             <button
+                                                type="button"
                                                 onClick={() => setOpenSub(openSub === href ? null : href)}
                                                 aria-label={`Toggle ${label} subcategories`}
-                                                className="px-3 py-2.5 text-xs uppercase tracking-wider text-charcoal/50 hover:text-bronze"
+                                                className="p-3 text-charcoal/60 hover:text-bronze transition-colors"
                                             >
-                                                {openSub === href ? 'Hide' : 'View'}
+                                                <ChevronDown
+                                                    size={18}
+                                                    className={`transition-transform duration-200 ${
+                                                        openSub === href ? 'rotate-180 text-bronze' : ''
+                                                    }`}
+                                                />
                                             </button>
                                         </div>
                                         {openSub === href && (
-                                            <div className="mb-1 ml-4 mt-0.5 space-y-0.5 border-l-2 border-bronze/40 pl-3">
-                                                {submenu.map((item) => (
+                                            <div className="my-1 ml-4 space-y-1 border-l-2 border-bronze/30 pl-3 py-1">
+                                                {submenu.map((subItem) => (
                                                     <a
-                                                        key={item.label}
-                                                        href={item.href}
+                                                        key={subItem.label}
+                                                        href={subItem.href}
                                                         onClick={() => setMobileOpen(false)}
-                                                        className="block rounded-md px-3 py-2 text-[13px] uppercase tracking-[0.12em] text-charcoal/60 hover:bg-cream hover:text-bronze"
+                                                        className="block rounded-md px-3 py-2 text-[12.5px] font-medium uppercase tracking-[0.08em] text-charcoal/70 hover:bg-cream hover:text-bronze transition-colors"
                                                     >
-                                                        {item.label}
+                                                        {subItem.label}
                                                     </a>
                                                 ))}
                                             </div>
@@ -283,25 +248,26 @@ export default function PublicLayout({ children, settings = {} }) {
                                         key={href}
                                         href={href}
                                         onClick={() => setMobileOpen(false)}
-                                        className={`block rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
+                                        className={`block rounded-lg px-3.5 py-3 text-sm font-semibold uppercase tracking-[0.1em] transition-colors ${
                                             url === href || (href !== '/' && url.startsWith(href))
-                                                ? 'bg-cream text-bronze'
-                                                : 'text-charcoal/80 hover:bg-cream'
+                                                ? 'bg-cream text-bronze font-bold'
+                                                : 'text-charcoal/85 hover:bg-cream'
                                         }`}
                                     >
                                         {label}
                                     </a>
                                 )
                             )}
-                            <a
-                                href="/contact"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={() => setMobileOpen(false)}
-                                className="mt-2 block rounded-full border border-charcoal/25 bg-transparent px-4 py-3 text-center text-sm font-semibold uppercase tracking-[0.14em] text-charcoal/80 opacity-80 hover:opacity-100 hover:border-black hover:bg-black hover:text-white transition-all"
-                            >
-                                Get Started
-                            </a>
+
+                            <div className="pt-3 pb-2 border-t border-sand/40 mt-2">
+                                <a
+                                    href="/contact"
+                                    onClick={() => setMobileOpen(false)}
+                                    className="block w-full rounded-lg border border-charcoal/40 bg-charcoal px-4 py-3 text-center text-sm font-semibold uppercase tracking-[0.12em] text-white hover:bg-black transition-all"
+                                >
+                                    Get Started
+                                </a>
+                            </div>
                         </nav>
                     </div>
                 )}
