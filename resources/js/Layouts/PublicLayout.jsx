@@ -89,6 +89,51 @@ function Wordmark({ settings = {}, light = false, isFooter = false }) {
     );
 }
 
+function TypewriterNotice() {
+    const fullText = "Interior Products Wholesale Showroom & Farm";
+    const bronzeStart = 38; // "Farm" begins at index 38
+    const [displayText, setDisplayText] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    useEffect(() => {
+        let timeout;
+        if (!isDeleting && displayText.length < fullText.length) {
+            timeout = setTimeout(() => {
+                setDisplayText(fullText.slice(0, displayText.length + 1));
+            }, 60);
+        } else if (!isDeleting && displayText.length === fullText.length) {
+            timeout = setTimeout(() => {
+                setIsDeleting(true);
+            }, 3000);
+        } else if (isDeleting && displayText.length > 0) {
+            timeout = setTimeout(() => {
+                setDisplayText(fullText.slice(0, displayText.length - 1));
+            }, 28);
+        } else if (isDeleting && displayText.length === 0) {
+            timeout = setTimeout(() => {
+                setIsDeleting(false);
+            }, 400);
+        }
+        return () => clearTimeout(timeout);
+    }, [displayText, isDeleting]);
+
+    const prefixPart = displayText.slice(0, Math.min(displayText.length, bronzeStart));
+    const bronzePart = displayText.length > bronzeStart ? displayText.slice(bronzeStart) : '';
+
+    return (
+        <div className="w-full bg-[#1D1C1A] py-2 sm:py-2.5 border-b border-white/[0.06] overflow-hidden">
+            <div className="mx-auto flex w-full max-w-[1440px] items-center justify-center px-4">
+                <p className="flex items-center justify-center text-center text-[9.5px] min-[380px]:text-[10.5px] uppercase tracking-[0.12em] sm:tracking-[0.2em] sm:text-[11px] md:text-xs font-medium text-cream/90 min-h-[22px] whitespace-pre">
+                    <span>{prefixPart}</span>
+                    {bronzePart && (
+                        <span className="text-bronze-light font-semibold">{bronzePart}</span>
+                    )}
+                </p>
+            </div>
+        </div>
+    );
+}
+
 export default function PublicLayout({ children, settings = {} }) {
     const { url } = usePage();
     const [scrolled, setScrolled] = useState(false);
@@ -113,6 +158,9 @@ export default function PublicLayout({ children, settings = {} }) {
 
     return (
         <div className="min-h-screen bg-white font-sans text-charcoal antialiased selection:bg-bronze selection:text-white">
+            {/* Top Notice Bar */}
+            <TypewriterNotice />
+
             {/* Top Navigation */}
             <header
                 className={`group relative sticky top-0 z-[61] w-full transition-all duration-300 ${
