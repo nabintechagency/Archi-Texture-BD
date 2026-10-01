@@ -112,7 +112,7 @@ function HeroSection({ settings }) {
                         href="/products"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex w-full sm:w-auto items-center justify-center rounded-[8px] bg-bronze text-white border border-bronze px-7 sm:px-9 py-3.5 sm:py-4 text-xs sm:text-[13px] font-semibold uppercase tracking-[0.16em] shadow-xl transition-all duration-300 hover:bg-bronze-dark hover:border-bronze-dark hover:text-white"
+                        className="inline-flex w-full sm:w-auto items-center justify-center rounded-[8px] bg-white text-black border border-white px-7 sm:px-9 py-3.5 sm:py-4 text-xs sm:text-[13px] font-semibold uppercase tracking-[0.16em] shadow-xl transition-all duration-300 hover:bg-bronze hover:border-bronze hover:text-white"
                     >
                         Our Products
                     </a>
