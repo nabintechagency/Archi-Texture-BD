@@ -21,15 +21,40 @@ export default function Login({ status, canResetPassword }) {
         });
     };
 
+    const fillAdmin = () => {
+        setData({
+            email: 'admin@architexture.com',
+            password: 'admin123',
+            remember: true,
+        });
+    };
+
     return (
         <GuestLayout>
-            <Head title="Log in" />
+            <Head title="Log in — Studio Admin" />
 
             {status && (
                 <div className="mb-4 text-sm font-medium text-green-600">
                     {status}
                 </div>
             )}
+
+            {/* Quick Demo Helper Banner */}
+            <div className="mb-5 rounded-xl border border-amber-500/40 bg-amber-50 p-3.5 text-xs text-amber-900 flex items-center justify-between shadow-sm">
+                <div>
+                    <p className="font-bold text-amber-950">Administrator Credentials</p>
+                    <p className="text-[11px] text-amber-800 mt-0.5">
+                        <span className="font-mono font-semibold">admin@architexture.com</span> &bull; <span className="font-mono font-semibold">admin123</span>
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    onClick={fillAdmin}
+                    className="shrink-0 rounded-lg bg-amber-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-amber-700 transition shadow"
+                >
+                    Auto-Fill
+                </button>
+            </div>
 
             <form onSubmit={submit}>
                 <div>

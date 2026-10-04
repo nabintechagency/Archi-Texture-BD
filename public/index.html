@@ -15,7 +15,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet" />
 
         <!-- Bundled Stylesheets -->
-        <link rel="stylesheet" href="/build/assets/app-CsrVk36c.css" />
+        <link rel="stylesheet" href="/build/assets/app-BhT4C26I.css" />
     </head>
     <body class="font-sans antialiased bg-[#FAF7F2] text-[#1C1A17]">
         <div id="app"></div>
@@ -179,7 +179,81 @@
                     testimonials: []
                 };
 
-                if (path === '/products' || path === '/services') {
+                if (!window.route) {
+                    const routeMap = {
+                        'login': '/login',
+                        'logout': '/logout',
+                        'register': '/register',
+                        'dashboard': '/admin',
+                        'admin.dashboard': '/admin',
+                        'admin.orders': '/admin/orders',
+                        'admin.orders.index': '/admin/orders',
+                        'admin.orders.create': '/admin/orders/create',
+                        'admin.products': '/admin/products',
+                        'admin.products.index': '/admin/products',
+                        'admin.products.create': '/admin/products/create',
+                        'admin.profile.edit': '/admin/profile',
+                        'admin.profile.update': '/admin/profile',
+                        'admin.profile.destroy': '/admin/profile',
+                        'password.request': '/forgot-password',
+                        'password.email': '/forgot-password',
+                        'password.update': '/password',
+                        'password.confirm': '/confirm-password',
+                        'verification.send': '/email/verification-notification',
+                    };
+
+                    const checkCurrent = function(pattern) {
+                        if (!pattern) return path;
+                        const cleanPattern = pattern.replace(/\.\*$/, '').replace(/\./g, '/');
+                        return path === '/' + cleanPattern || path.startsWith('/' + cleanPattern);
+                    };
+
+                    window.route = function(name, params) {
+                        if (!name) {
+                            return {
+                                current: checkCurrent
+                            };
+                        }
+                        let base = routeMap[name] || ('/' + (name || '').replace(/\./g, '/'));
+                        if (params !== undefined && params !== null) {
+                            if (typeof params === 'object') {
+                                const qs = new URLSearchParams(params).toString();
+                                if (qs) base += '?' + qs;
+                            } else {
+                                base += '/' + params;
+                            }
+                        }
+                        return base;
+                    };
+                    window.route.current = checkCurrent;
+                }
+
+                if (path === '/login' || path === '/admin/login') {
+                    component = "Auth/Login";
+                    pageProps = { canResetPassword: true, status: null, auth: { user: null } };
+                } else if (path === '/admin' || path === '/admin/dashboard') {
+                    component = "Admin/Dashboard";
+                    pageProps = {
+                        stats: { orders: 4, products: 8, low_stock: 1, pending_orders: 1, revenue: 672500, projects: 6, messages: 0 },
+                        recent_orders: [],
+                        auth: { user: { name: 'Archi Texture Admin', email: 'admin@architexture.com', role: 'admin' } }
+                    };
+                } else if (path === '/admin/orders') {
+                    component = "Admin/Orders/Index";
+                    pageProps = {
+                        orders: { data: [], links: [] },
+                        orderStats: { total: 4, pending: 1, processing: 2, delivered: 1, total_sales: 265000 },
+                        auth: { user: { name: 'Archi Texture Admin', email: 'admin@architexture.com', role: 'admin' } }
+                    };
+                } else if (path === '/admin/products') {
+                    component = "Admin/Products/Index";
+                    pageProps = {
+                        products: { data: PRODUCTS, links: [] },
+                        inventoryStats: { total_products: 8, in_stock: 6, low_stock: 1, out_of_stock: 1, total_value: 1250000 },
+                        categories: ['Furniture', 'Lighting', 'Textiles', 'Decor'],
+                        auth: { user: { name: 'Archi Texture Admin', email: 'admin@architexture.com', role: 'admin' } }
+                    };
+                } else if (path === '/products' || path === '/services') {
                     component = "Public/Products";
                     pageProps = { products: PRODUCTS, settings: settings };
                 } else if (path === '/portfolio') {
@@ -209,6 +283,6 @@
         </script>
 
         <!-- App Bundles -->
-        <script type="module" src="/build/assets/app-CAW01nD6.js"></script>
+        <script type="module" src="/build/assets/app-285E8jWc.js"></script>
     </body>
 </html>

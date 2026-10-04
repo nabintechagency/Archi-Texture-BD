@@ -15,10 +15,32 @@ Route::get('/portfolio', [PublicController::class, 'portfolio'])->name('portfoli
 Route::get('/experience', [PublicController::class, 'experience'])->name('experience');
 Route::get('/contact', [PublicController::class, 'contact'])->name('contact');
 Route::post('/contact', [PublicController::class, 'sendMessage'])->name('contact.send');
+Route::post('/checkout', [PublicController::class, 'checkout'])->name('checkout');
+
+// Admin Login Redirect Alias
+Route::get('/admin/login', fn () => redirect()->route('login'))->name('admin.login');
 
 // Admin Routes
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    // Orders Management
+    Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
+    Route::get('/orders/create', [AdminController::class, 'orderCreate'])->name('orders.create');
+    Route::post('/orders', [AdminController::class, 'orderStore'])->name('orders.store');
+    Route::get('/orders/{order}', [AdminController::class, 'orderShow'])->name('orders.show');
+    Route::put('/orders/{order}', [AdminController::class, 'orderUpdate'])->name('orders.update');
+    Route::patch('/orders/{order}/status', [AdminController::class, 'orderUpdateStatus'])->name('orders.updateStatus');
+    Route::delete('/orders/{order}', [AdminController::class, 'orderDestroy'])->name('orders.destroy');
+
+    // Products & Inventory Management
+    Route::get('/products', [AdminController::class, 'products'])->name('products');
+    Route::get('/products/create', [AdminController::class, 'productCreate'])->name('products.create');
+    Route::post('/products', [AdminController::class, 'productStore'])->name('products.store');
+    Route::get('/products/{product}/edit', [AdminController::class, 'productEdit'])->name('products.edit');
+    Route::put('/products/{product}', [AdminController::class, 'productUpdate'])->name('products.update');
+    Route::patch('/products/{product}/stock', [AdminController::class, 'updateProductStock'])->name('products.stock');
+    Route::delete('/products/{product}', [AdminController::class, 'productDestroy'])->name('products.destroy');
 
     // Projects
     Route::get('/projects', [AdminController::class, 'projects'])->name('projects');
@@ -64,11 +86,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     Route::get('/sliders', [AdminController::class, 'sliders'])->name('sliders');
     Route::get('/sliders/create', [AdminController::class, 'sliderCreate'])->name('sliders.create');
     Route::get('/sliders/{slider}/edit', [AdminController::class, 'sliderEdit'])->name('sliders.edit');
-
-    // Products
-    Route::get('/products', [AdminController::class, 'products'])->name('products');
-    Route::get('/products/create', [AdminController::class, 'productCreate'])->name('products.create');
-    Route::get('/products/{product}/edit', [AdminController::class, 'productEdit'])->name('products.edit');
 
     // Media
     Route::get('/media', [AdminController::class, 'media'])->name('media');

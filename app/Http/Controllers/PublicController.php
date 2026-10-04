@@ -94,4 +94,75 @@ class PublicController extends Controller
 
         return back()->with('success', 'Your message has been sent successfully!');
     }
+
+    public function checkout(Request $request)
+    {
+        $validated = $request->validate([
+            'customer_name'    => ['required', 'string', 'max:255'],
+            'customer_email'   => ['nullable', 'email', 'max:255'],
+            'customer_phone'   => ['required', 'string', 'max:50'],
+            'shipping_address' => ['required', 'string'],
+            'city'             => ['nullable', 'string', 'max:100'],
+            'notes'            => ['nullable', 'string'],
+            'payment_method'   => ['nullable', 'string'],
+            'items'            => ['required', 'array', 'min:1'],
+            'items.*.id'       => ['required', 'integer', 'exists:products,id'],
+            'items.*.quantity' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $subtotal = 0;
+        $orderItemsData = [];
+
+        foreach ($validated['items'] as $cartItem) {
+            $product = Product::findOrFail($cartItem['id']);
+            $qty = (int) $cartItem['quantity'];
+            $price = (float) $product->price;
+            $lineTotal = $price * $qty;
+            $subtotal += $lineTotal;
+
+            $orderItemsData[] = [
+                'product_id'     => $product->id,
+                'product_name'   => $product->name,
+                'sku'            => $product->sku,
+                'price'          => $price,
+                'quantity'       => $qty,
+                'total'          => $lineTotal,
+                'featured_image' => $product->featured_image,
+            ];
+
+            // Decrement inventory stock if available
+            if ($product->stock_quantity >= $qty) {
+                $product->decrement('stock_quantity', $qty);
+            }
+        }
+
+        $order = \App\Models\Order::create([
+            'customer_name'    => $validated['customer_name'],
+            'customer_email'   => $validated['customer_email'] ?? null,
+            'customer_phone'   => $validated['customer_phone'],
+            'shipping_address' => $validated['shipping_address'],
+            'city'             => $validated['city'] ?? 'Dhaka',
+            'notes'            => $validated['notes'] ?? null,
+            'status'           => 'pending',
+            'payment_status'   => 'pending',
+            'payment_method'   => $validated['payment_method'] ?? 'cash_on_delivery',
+            'subtotal'         => $subtotal,
+            'shipping_fee'     => 0,
+            'discount'         => 0,
+            'total_amount'     => $subtotal,
+            'placed_at'        => now(),
+        ]);
+
+        foreach ($orderItemsData as $itemData) {
+            $order->items()->create($itemData);
+        }
+
+        return response()->json([
+            'success'      => true,
+            'order_number' => $order->order_number,
+            'total_amount' => $order->total_amount,
+            'message'      => 'Your order has been received successfully! Our concierge team will reach out for confirmation.',
+        ]);
+    }
 }
+

@@ -155,7 +155,32 @@ function getInertiaPayload(pathname) {
         testimonials: []
     };
 
-    if (cleanPath === '/products' || cleanPath === '/services') {
+    if (cleanPath === '/login' || cleanPath === '/admin/login') {
+        component = 'Auth/Login';
+        props = { canResetPassword: true, status: null, auth: { user: null } };
+    } else if (cleanPath === '/admin' || cleanPath === '/admin/dashboard') {
+        component = 'Admin/Dashboard';
+        props = {
+            stats: { orders: 4, products: 8, low_stock: 1, pending_orders: 1, revenue: 672500, projects: 6, messages: 0 },
+            recent_orders: [],
+            auth: { user: { name: 'Archi Texture Admin', email: 'admin@architexture.com', role: 'admin' } }
+        };
+    } else if (cleanPath === '/admin/orders') {
+        component = 'Admin/Orders/Index';
+        props = {
+            orders: { data: [], links: [] },
+            orderStats: { total: 4, pending: 1, processing: 2, delivered: 1, total_sales: 265000 },
+            auth: { user: { name: 'Archi Texture Admin', email: 'admin@architexture.com', role: 'admin' } }
+        };
+    } else if (cleanPath === '/admin/products') {
+        component = 'Admin/Products/Index';
+        props = {
+            products: { data: PRODUCTS, links: [] },
+            inventoryStats: { total_products: 8, in_stock: 6, low_stock: 1, out_of_stock: 1, total_value: 1250000 },
+            categories: ['Furniture', 'Lighting', 'Textiles', 'Decor'],
+            auth: { user: { name: 'Archi Texture Admin', email: 'admin@architexture.com', role: 'admin' } }
+        };
+    } else if (cleanPath === '/products' || cleanPath === '/services') {
         component = 'Public/Products';
         props = { products: PRODUCTS, settings: SETTINGS };
     } else if (cleanPath === '/portfolio') {

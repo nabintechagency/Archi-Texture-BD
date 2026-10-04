@@ -70,9 +70,27 @@ function NotificationToast({ toast, onDismiss, onOpenCart }) {
 /* -------------------------------------------------- */
 /* Cart Slide-Over Drawer                             */
 /* -------------------------------------------------- */
-function CartDrawer({ isOpen, onClose, cart = [], updateQuantity, removeFromCart, clearCart }) {
+function CartDrawer({ isOpen, onClose, cart = [], updateQuantity, removeFromCart, clearCart, settings = {} }) {
+    const [step, setStep] = useState('cart'); // 'cart', 'checkout', 'success'
+    const [customer, setCustomer] = useState({
+        name: '',
+        phone: '',
+        email: '',
+        address: '',
+        city: 'Dhaka',
+        notes: '',
+        payment_method: 'cash_on_delivery',
+    });
+    const [submitting, setSubmitting] = useState(false);
+    const [confirmedOrder, setConfirmedOrder] = useState(null);
+    const [errorMsg, setErrorMsg] = useState(null);
+
     useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen) {
+            setStep('cart');
+            setErrorMsg(null);
+            return;
+        }
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') onClose();
         };
@@ -90,19 +108,49 @@ function CartDrawer({ isOpen, onClose, cart = [], updateQuantity, removeFromCart
     const subtotal = cart.reduce((acc, item) => acc + (Number(item.price) || 0) * item.quantity, 0);
     const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-    const checkoutSubject = encodeURIComponent(
-        `Order Inquiry (${totalItems} items, Total: BDT ${subtotal.toLocaleString('en-US')})`
-    );
-    const checkoutMessage = encodeURIComponent(
-        `Hello ${settings.site_title || settings.company_name || 'Archi Texture'} Team,\n\nI would like to order the following curated pieces:\n` +
-            cart
-                .map(
-                    (item, idx) =>
-                        `${idx + 1}. ${item.name} (${item.category || 'Product'}) - Qty: ${item.quantity} - BDT ${(Number(item.price) * item.quantity).toLocaleString('en-US')}`
-                )
-                .join('\n') +
-            `\n\nTotal: BDT ${subtotal.toLocaleString('en-US')}\n\nPlease contact me regarding order confirmation, delivery schedule, and invoice.`
-    );
+    const handlePlaceOrder = async (e) => {
+        e.preventDefault();
+        setErrorMsg(null);
+        if (!customer.name.trim() || !customer.phone.trim() || !customer.address.trim()) {
+            setErrorMsg('Please complete your name, phone number, and delivery address.');
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            const res = await fetch('/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                body: JSON.stringify({
+                    customer_name: customer.name,
+                    customer_phone: customer.phone,
+                    customer_email: customer.email || null,
+                    shipping_address: customer.address,
+                    city: customer.city || 'Dhaka',
+                    notes: customer.notes || null,
+                    payment_method: customer.payment_method,
+                    items: cart.map(item => ({ id: item.id, quantity: item.quantity })),
+                }),
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setConfirmedOrder(data);
+                clearCart();
+                setStep('success');
+            } else {
+                setErrorMsg(data.message || 'There was an issue processing your order. Please try again.');
+            }
+        } catch (err) {
+            setErrorMsg('Connection error. Please check your internet connection and try again.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     return (
         <div className="fixed inset-0 z-[120] flex justify-end bg-charcoal/70 backdrop-blur-sm animate-fade-in">
@@ -114,10 +162,14 @@ function CartDrawer({ isOpen, onClose, cart = [], updateQuantity, removeFromCart
                 <div className="flex items-center justify-between border-b border-sand px-6 py-5">
                     <div className="flex items-center gap-2.5">
                         <ShoppingBag size={20} className="text-bronze" />
-                        <h2 className="font-serif-display text-xl text-charcoal">Your Selection</h2>
-                        <span className="rounded-full bg-bronze/10 px-2.5 py-0.5 text-xs font-semibold text-bronze">
-                            {totalItems} {totalItems === 1 ? 'item' : 'items'}
-                        </span>
+                        <h2 className="font-serif-display text-xl text-charcoal">
+                            {step === 'cart' ? 'Your Selection' : step === 'checkout' ? 'Order Checkout' : 'Order Placed'}
+                        </h2>
+                        {step === 'cart' && (
+                            <span className="rounded-full bg-bronze/10 px-2.5 py-0.5 text-xs font-semibold text-bronze">
+                                {totalItems} {totalItems === 1 ? 'item' : 'items'}
+                            </span>
+                        )}
                     </div>
                     <button
                         onClick={onClose}
@@ -128,151 +180,319 @@ function CartDrawer({ isOpen, onClose, cart = [], updateQuantity, removeFromCart
                     </button>
                 </div>
 
-                {/* Cart Items List */}
-                <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-                    {cart.length > 0 ? (
-                        cart.map((item) => (
-                            <div
-                                key={item.id}
-                                className="group flex items-start gap-4 rounded-xl border border-sand/70 p-3.5 bg-cream/20 hover:border-bronze/30 transition"
-                            >
-                                {/* Thumbnail */}
-                                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-sand/30 border border-sand/50">
-                                    {item.featured_image ? (
-                                        <img
-                                            src={item.featured_image}
-                                            alt={item.name}
-                                            className="h-full w-full object-cover"
-                                        />
-                                    ) : (
-                                        <div className="flex h-full w-full items-center justify-center text-xs text-charcoal/30">
-                                            Piece
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Info */}
-                                <div className="flex flex-1 flex-col justify-between">
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div>
-                                            <h3 className="font-serif-display text-sm font-semibold text-charcoal line-clamp-1">
-                                                {item.name}
-                                            </h3>
-                                            <p className="text-[11px] uppercase tracking-wider text-bronze font-medium mt-0.5">
-                                                {item.category}
-                                            </p>
-                                        </div>
-                                        <button
-                                            onClick={() => removeFromCart(item.id)}
-                                            className="text-charcoal/40 hover:text-red-600 transition p-1"
-                                            title="Remove item"
-                                        >
-                                            <Trash2 size={15} />
-                                        </button>
-                                    </div>
-
-                                    <div className="mt-3 flex items-center justify-between">
-                                        {/* Stepper */}
-                                        <div className="inline-flex items-center rounded-lg border border-sand bg-white shadow-sm">
-                                            <button
-                                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                className="p-1.5 text-charcoal/60 hover:text-charcoal hover:bg-sand/30 transition rounded-l-lg"
-                                                aria-label="Decrease quantity"
-                                            >
-                                                <Minus size={13} />
-                                            </button>
-                                            <span className="w-8 text-center text-xs font-semibold text-charcoal">
-                                                {item.quantity}
-                                            </span>
-                                            <button
-                                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                className="p-1.5 text-charcoal/60 hover:text-charcoal hover:bg-sand/30 transition rounded-r-lg"
-                                                aria-label="Increase quantity"
-                                            >
-                                                <Plus size={13} />
-                                            </button>
-                                        </div>
-
-                                        {/* Item Total */}
-                                        <span className="font-serif-display text-sm font-semibold text-bronze">
-                                            BDT {((Number(item.price) || 0) * item.quantity).toLocaleString('en-US')}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="flex flex-col items-center justify-center py-20 text-center">
-                            <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-sand/50 text-charcoal/40">
-                                <ShoppingBag size={28} strokeWidth={1.5} />
-                            </div>
-                            <h3 className="font-serif-display text-lg text-charcoal">Your bag is empty</h3>
-                            <p className="mt-1 max-w-[220px] text-xs text-charcoal/60">
-                                Discover our architectural pieces and add them to your selection.
-                            </p>
-                            <button
-                                onClick={onClose}
-                                className="mt-6 inline-flex items-center gap-2 rounded-full bg-bronze px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-white shadow-md hover:bg-bronze-dark transition"
-                            >
-                                Browse Pieces
-                            </button>
+                {/* Content */}
+                {step === 'success' ? (
+                    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-md">
+                            <CheckCircle2 size={32} />
                         </div>
-                    )}
-                </div>
+                        <h3 className="font-serif-display text-2xl font-bold text-charcoal">Order Placed Successfully!</h3>
+                        <div className="rounded-2xl border border-sand bg-cream/40 p-4 w-full text-left space-y-2">
+                            <p className="text-xs text-charcoal/60 uppercase tracking-wider font-semibold">Order Reference</p>
+                            <p className="font-mono text-base font-bold text-bronze">{confirmedOrder?.order_number}</p>
+                            <p className="text-xs text-charcoal/70 pt-1">
+                                Total: <span className="font-bold text-charcoal">BDT {Number(confirmedOrder?.total_amount || 0).toLocaleString('en-US')}</span>
+                            </p>
+                        </div>
+                        <p className="text-xs text-charcoal/70 max-w-xs leading-relaxed">
+                            Thank you! Our private concierge team will reach out to you shortly to confirm logistics and deliver your architectural pieces.
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                onClose();
+                                setStep('cart');
+                            }}
+                            className="w-full rounded-[8px] bg-bronze py-3.5 text-xs font-semibold uppercase tracking-wider text-white shadow-xl hover:bg-bronze-dark transition"
+                        >
+                            Return to Collection
+                        </button>
+                    </div>
+                ) : step === 'checkout' ? (
+                    <form onSubmit={handlePlaceOrder} className="flex-1 flex flex-col justify-between overflow-y-auto">
+                        <div className="p-6 space-y-4">
+                            {errorMsg && (
+                                <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-600 font-medium">
+                                    {errorMsg}
+                                </div>
+                            )}
 
-                {/* Footer & Checkout */}
-                {cart.length > 0 && (
-                    <div className="border-t border-sand bg-cream/30 p-6 space-y-4">
-                        <div className="space-y-2 text-xs text-charcoal/70">
-                            <div className="flex justify-between">
-                                <span>Subtotal</span>
-                                <span className="font-serif-display font-semibold text-charcoal text-sm">
+                            <div>
+                                <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/70 mb-1">
+                                    Your Full Name *
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={customer.name}
+                                    onChange={(e) => setCustomer({ ...customer, name: e.target.value })}
+                                    placeholder="e.g. Mahfuzul Alam"
+                                    className="w-full rounded-lg border border-sand p-2.5 text-xs text-charcoal focus:border-bronze focus:outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/70 mb-1">
+                                    Phone Number *
+                                </label>
+                                <input
+                                    type="tel"
+                                    required
+                                    value={customer.phone}
+                                    onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
+                                    placeholder="e.g. +880 1712-345678"
+                                    className="w-full rounded-lg border border-sand p-2.5 text-xs text-charcoal focus:border-bronze focus:outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/70 mb-1">
+                                    Email Address (Optional)
+                                </label>
+                                <input
+                                    type="email"
+                                    value={customer.email}
+                                    onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
+                                    placeholder="your.email@domain.com"
+                                    className="w-full rounded-lg border border-sand p-2.5 text-xs text-charcoal focus:border-bronze focus:outline-none"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/70 mb-1">
+                                        City
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={customer.city}
+                                        onChange={(e) => setCustomer({ ...customer, city: e.target.value })}
+                                        placeholder="Dhaka"
+                                        className="w-full rounded-lg border border-sand p-2.5 text-xs text-charcoal focus:border-bronze focus:outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/70 mb-1">
+                                        Payment Method
+                                    </label>
+                                    <select
+                                        value={customer.payment_method}
+                                        onChange={(e) => setCustomer({ ...customer, payment_method: e.target.value })}
+                                        className="w-full rounded-lg border border-sand p-2.5 text-xs text-charcoal focus:border-bronze focus:outline-none"
+                                    >
+                                        <option value="cash_on_delivery">Cash on Delivery</option>
+                                        <option value="bkash">bKash Pay</option>
+                                        <option value="bank_transfer">Bank Wire</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/70 mb-1">
+                                    Delivery Address *
+                                </label>
+                                <textarea
+                                    required
+                                    rows={2}
+                                    value={customer.address}
+                                    onChange={(e) => setCustomer({ ...customer, address: e.target.value })}
+                                    placeholder="Road, House, Flat number, Area..."
+                                    className="w-full rounded-lg border border-sand p-2.5 text-xs text-charcoal focus:border-bronze focus:outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/70 mb-1">
+                                    Delivery Notes (Optional)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={customer.notes}
+                                    onChange={(e) => setCustomer({ ...customer, notes: e.target.value })}
+                                    placeholder="Special instructions or preferred time..."
+                                    className="w-full rounded-lg border border-sand p-2.5 text-xs text-charcoal focus:border-bronze focus:outline-none"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Checkout Footer */}
+                        <div className="border-t border-sand bg-cream/30 p-6 space-y-3">
+                            <div className="flex justify-between items-baseline">
+                                <span className="text-xs font-semibold uppercase tracking-wider text-charcoal">
+                                    Total Payable:
+                                </span>
+                                <span className="font-serif-display text-xl font-bold text-bronze">
                                     BDT {subtotal.toLocaleString('en-US')}
                                 </span>
                             </div>
-                            <div className="flex justify-between items-center text-charcoal/60">
-                                <span className="flex items-center gap-1.5">
-                                    <Truck size={13} className="text-bronze" /> White-Glove Delivery
-                                </span>
-                                <span className="text-emerald-700 font-semibold uppercase tracking-wider text-[10px]">
-                                    Complimentary
-                                </span>
-                            </div>
-                        </div>
 
-                        <div className="border-t border-sand/70 pt-3 flex justify-between items-baseline">
-                            <span className="font-serif-display text-base font-semibold text-charcoal">
-                                Total Estimated
-                            </span>
-                            <span className="font-serif-display text-xl font-bold text-bronze">
-                                BDT {subtotal.toLocaleString('en-US')}
-                            </span>
-                        </div>
-
-                        <div className="space-y-2 pt-2">
-                            <Link
-                                href={`/contact?subject=${checkoutSubject}&message=${checkoutMessage}`}
-                                className="w-full inline-flex items-center justify-center gap-2 rounded-[8px] bg-bronze py-3.5 text-xs font-semibold uppercase tracking-[0.14em] text-white shadow-xl hover:bg-bronze-dark transition-all duration-300"
+                            <button
+                                type="submit"
+                                disabled={submitting}
+                                className="w-full inline-flex items-center justify-center gap-2 rounded-[8px] bg-bronze py-3.5 text-xs font-semibold uppercase tracking-[0.14em] text-white shadow-xl hover:bg-bronze-dark transition-all duration-300 disabled:opacity-50"
                             >
-                                Proceed to Order Inquiry <ArrowRight size={14} />
-                            </Link>
+                                {submitting ? 'Submitting Order...' : 'Confirm & Place Order'} <ArrowRight size={14} />
+                            </button>
 
-                            <div className="flex items-center justify-between pt-1">
-                                <button
-                                    onClick={clearCart}
-                                    className="text-[11px] text-charcoal/50 hover:text-red-600 transition uppercase tracking-wider"
-                                >
-                                    Clear Bag
-                                </button>
-                                <button
-                                    onClick={onClose}
-                                    className="text-[11px] text-charcoal/60 hover:text-charcoal transition uppercase tracking-wider"
-                                >
-                                    Continue Browsing
-                                </button>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setStep('cart')}
+                                className="w-full text-center text-xs text-charcoal/60 hover:text-charcoal transition uppercase tracking-wider py-1"
+                            >
+                                Back to Cart
+                            </button>
                         </div>
-                    </div>
+                    </form>
+                ) : (
+                    <>
+                        {/* Cart Items List */}
+                        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+                            {cart.length > 0 ? (
+                                cart.map((item) => (
+                                    <div
+                                        key={item.id}
+                                        className="group flex items-start gap-4 rounded-xl border border-sand/70 p-3.5 bg-cream/20 hover:border-bronze/30 transition"
+                                    >
+                                        {/* Thumbnail */}
+                                        <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-sand/30 border border-sand/50">
+                                            {item.featured_image ? (
+                                                <img
+                                                    src={item.featured_image}
+                                                    alt={item.name}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="flex h-full w-full items-center justify-center text-xs text-charcoal/30">
+                                                    Piece
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Info */}
+                                        <div className="flex flex-1 flex-col justify-between">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div>
+                                                    <h3 className="font-serif-display text-sm font-semibold text-charcoal line-clamp-1">
+                                                        {item.name}
+                                                    </h3>
+                                                    <p className="text-[11px] uppercase tracking-wider text-bronze font-medium mt-0.5">
+                                                        {item.category}
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={() => removeFromCart(item.id)}
+                                                    className="text-charcoal/40 hover:text-red-600 transition p-1"
+                                                    title="Remove item"
+                                                >
+                                                    <Trash2 size={15} />
+                                                </button>
+                                            </div>
+
+                                            <div className="mt-3 flex items-center justify-between">
+                                                {/* Stepper */}
+                                                <div className="inline-flex items-center rounded-lg border border-sand bg-white shadow-sm">
+                                                    <button
+                                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                        className="p-1.5 text-charcoal/60 hover:text-charcoal hover:bg-sand/30 transition rounded-l-lg"
+                                                        aria-label="Decrease quantity"
+                                                    >
+                                                        <Minus size={13} />
+                                                    </button>
+                                                    <span className="w-8 text-center text-xs font-semibold text-charcoal">
+                                                        {item.quantity}
+                                                    </span>
+                                                    <button
+                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                        className="p-1.5 text-charcoal/60 hover:text-charcoal hover:bg-sand/30 transition rounded-r-lg"
+                                                        aria-label="Increase quantity"
+                                                    >
+                                                        <Plus size={13} />
+                                                    </button>
+                                                </div>
+
+                                                {/* Item Total */}
+                                                <span className="font-serif-display text-sm font-semibold text-bronze">
+                                                    BDT {((Number(item.price) || 0) * item.quantity).toLocaleString('en-US')}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-20 text-center">
+                                    <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-sand/50 text-charcoal/40">
+                                        <ShoppingBag size={28} strokeWidth={1.5} />
+                                    </div>
+                                    <h3 className="font-serif-display text-lg text-charcoal">Your bag is empty</h3>
+                                    <p className="mt-1 max-w-[220px] text-xs text-charcoal/60">
+                                        Discover our architectural pieces and add them to your selection.
+                                    </p>
+                                    <button
+                                        onClick={onClose}
+                                        className="mt-6 inline-flex items-center gap-2 rounded-full bg-bronze px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-white shadow-md hover:bg-bronze-dark transition"
+                                    >
+                                        Browse Pieces
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer & Checkout */}
+                        {cart.length > 0 && (
+                            <div className="border-t border-sand bg-cream/30 p-6 space-y-4">
+                                <div className="space-y-2 text-xs text-charcoal/70">
+                                    <div className="flex justify-between">
+                                        <span>Subtotal</span>
+                                        <span className="font-serif-display font-semibold text-charcoal text-sm">
+                                            BDT {subtotal.toLocaleString('en-US')}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-charcoal/60">
+                                        <span className="flex items-center gap-1.5">
+                                            <Truck size={13} className="text-bronze" /> White-Glove Delivery
+                                        </span>
+                                        <span className="text-emerald-700 font-semibold uppercase tracking-wider text-[10px]">
+                                            Complimentary
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="border-t border-sand/70 pt-3 flex justify-between items-baseline">
+                                    <span className="font-serif-display text-base font-semibold text-charcoal">
+                                        Total Estimated
+                                    </span>
+                                    <span className="font-serif-display text-xl font-bold text-bronze">
+                                        BDT {subtotal.toLocaleString('en-US')}
+                                    </span>
+                                </div>
+
+                                <div className="space-y-2 pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setStep('checkout')}
+                                        className="w-full inline-flex items-center justify-center gap-2 rounded-[8px] bg-bronze py-3.5 text-xs font-semibold uppercase tracking-[0.14em] text-white shadow-xl hover:bg-bronze-dark transition-all duration-300"
+                                    >
+                                        Proceed to Checkout <ArrowRight size={14} />
+                                    </button>
+
+                                    <div className="flex items-center justify-between pt-1">
+                                        <button
+                                            onClick={clearCart}
+                                            className="text-[11px] text-charcoal/50 hover:text-red-600 transition uppercase tracking-wider"
+                                        >
+                                            Clear Bag
+                                        </button>
+                                        <button
+                                            onClick={onClose}
+                                            className="text-[11px] text-charcoal/60 hover:text-charcoal transition uppercase tracking-wider"
+                                        >
+                                            Continue Browsing
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>
