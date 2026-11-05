@@ -29,7 +29,7 @@ const FAQS = [
 
 export default function Contact({ settings = {} }) {
     const phone = settings.contact_phone || settings.phone || '01626778573';
-    const email = settings.contact_email || settings.email || 'contact@architexture.com';
+    const email = settings.contact_email || settings.email || 'contact@architexturebd.com';
     const location = settings.contact_address || settings.location || settings.address || 'Mohakhali, Dhaka, Bangladesh';
 
     const [copiedField, setCopiedField] = useState(null);

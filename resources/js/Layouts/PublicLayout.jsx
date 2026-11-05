@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useState, useEffect, useCallback } from 'react';
-import { Menu, X, Mail, ArrowUp, ChevronDown, Phone } from 'lucide-react';
+import { Menu, X, Mail, ArrowUp, ChevronDown, Phone, MapPin } from 'lucide-react';
 
 const FacebookIcon = ({ size = 17 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -20,30 +20,29 @@ const YoutubeIcon = ({ size = 17 }) => (
     </svg>
 );
 
-const PRODUCT_CATEGORIES = ['Furniture', 'Lighting', 'Decor', 'Textiles'];
-const PORTFOLIO_ROOMS = ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Office', 'Dining'];
+const LinkedinIcon = ({ size = 17 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+    </svg>
+);
 
-const navLinks = [
-    { label: 'Home', href: '/' },
-    {
-        label: 'Our Products',
-        href: '/products',
-        submenu: PRODUCT_CATEGORIES.map((cat) => ({
-            label: cat,
-            href: `/products?category=${encodeURIComponent(cat)}`,
-        })),
-    },
-    {
-        label: 'Portfolio',
-        href: '/portfolio',
-        submenu: PORTFOLIO_ROOMS.map((room) => ({
-            label: room,
-            href: `/portfolio?category=${encodeURIComponent(room)}`,
-        })),
-    },
-    { label: 'About Us', href: '/about' },
-    { label: 'Contact', href: '/contact' },
-];
+const PinterestIcon = ({ size = 17 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 0a12 12 0 0 0-4.37 23.18c-.07-.94-.13-2.39.03-3.42.14-.94.94-3.99.94-3.99s-.24-.48-.24-1.19c0-1.12.65-1.95 1.46-1.95.69 0 1.02.52 1.02 1.14 0 .69-.44 1.73-.67 2.69-.19.8.4 1.46 1.19 1.46 1.43 0 2.53-1.51 2.53-3.69 0-1.93-1.39-3.28-3.37-3.28-2.46 0-3.9 1.85-3.9 3.76 0 .74.29 1.54.64 1.97.07.09.08.16.06.25-.07.28-.22.88-.25 1-.04.16-.13.2-.3.12-1.12-.52-1.82-2.15-1.82-3.46 0-2.82 2.05-5.41 5.91-5.41 3.1 0 5.51 2.21 5.51 5.16 0 3.08-1.94 5.56-4.64 5.56-.91 0-1.76-.47-2.05-1.02l-.56 2.13c-.2.78-.75 1.76-1.12 2.36A12 12 0 1 0 12 0z"/>
+    </svg>
+);
+
+const WhatsappIcon = ({ size = 17 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+    </svg>
+);
+
+const XIcon = ({ size = 16 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+);
 
 function Wordmark({ settings = {}, light = false, isFooter = false }) {
     const rawTitle = settings.site_title || settings.company_name || 'ARCHI-TEXTURE';
@@ -136,12 +135,52 @@ function TypewriterNotice({ text = "Interior Products Wholesale Showroom & Farm"
     );
 }
 
-export default function PublicLayout({ children, settings = {} }) {
-    const { url } = usePage();
+export default function PublicLayout({ children, settings: propSettings = {} }) {
+    const { url, props } = usePage();
+    const settings = { ...(props?.settings || {}), ...propSettings };
     const [scrolled, setScrolled] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [openSub, setOpenSub] = useState(null);
     const [showScrollTop, setShowScrollTop] = useState(false);
+
+    // Dynamically include all active and newly created product categories
+    const sharedProductCategories = props?.sharedProductCategories || [];
+    const baseCategories = ['Furniture', 'Lighting', 'Decor'];
+    const allProductCategories = Array.from(new Set([...baseCategories, ...sharedProductCategories]))
+        .filter(c => c && !c.toLowerCase().includes('textile'));
+
+    // Dynamically include all active and newly created portfolio room categories
+    const sharedPortfolioCategories = props?.sharedPortfolioCategories || [];
+    const basePortfolioRooms = ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Office', 'Dining'];
+    const allPortfolioCategories = Array.from(new Set([...sharedPortfolioCategories, ...basePortfolioRooms]));
+
+    const navLinks = [
+        { label: 'Home', href: '/' },
+        {
+            label: 'Our Products',
+            href: '/products',
+            submenu: [
+                { label: 'All Products', href: '/products' },
+                ...allProductCategories.map((cat) => ({
+                    label: cat,
+                    href: `/products?category=${encodeURIComponent(cat)}`,
+                })),
+            ],
+        },
+        {
+            label: 'Portfolio',
+            href: '/portfolio',
+            submenu: [
+                { label: 'All Projects', href: '/portfolio' },
+                ...allPortfolioCategories.map((room) => ({
+                    label: room,
+                    href: `/portfolio?category=${encodeURIComponent(room)}`,
+                })),
+            ],
+        },
+        { label: 'About Us', href: '/about' },
+        { label: 'Contact', href: '/contact' },
+    ];
 
     useEffect(() => {
         const onScroll = () => {
@@ -346,31 +385,55 @@ export default function PublicLayout({ children, settings = {} }) {
                                 <h3 className="mb-3 sm:mb-4 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.16em] sm:tracking-[0.2em] text-cream/50">
                                     Join Our Community
                                 </h3>
-                                <div className="flex items-center gap-2.5 sm:gap-3">
+                                <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
                                     {[
-                                        { key: 'facebook_url', label: 'Facebook', Icon: FacebookIcon },
-                                        { key: 'instagram_url', label: 'Instagram', Icon: InstagramIcon },
-                                        { key: 'youtube_url', label: 'YouTube', Icon: YoutubeIcon },
-                                    ].map(({ key, label, Icon }) => (
-                                        <a
-                                            key={key}
-                                            href={settings[key] || '#'}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            aria-label={label}
-                                            className="rounded-full border border-cream/15 p-2 sm:p-2.5 text-cream/60 transition-all duration-300 hover:border-bronze hover:bg-bronze hover:text-white"
-                                        >
-                                            <Icon size={16} />
-                                        </a>
-                                    ))}
+                                        { key: 'facebook_url', label: 'Facebook', Icon: FacebookIcon, defaultUrl: 'https://facebook.com' },
+                                        { key: 'instagram_url', label: 'Instagram', Icon: InstagramIcon, defaultUrl: 'https://instagram.com' },
+                                        { key: 'youtube_url', label: 'YouTube', Icon: YoutubeIcon, defaultUrl: 'https://youtube.com' },
+                                        { key: 'linkedin_url', label: 'LinkedIn', Icon: LinkedinIcon },
+                                        { key: 'pinterest_url', label: 'Pinterest', Icon: PinterestIcon },
+                                        { key: 'whatsapp_url', label: 'WhatsApp', Icon: WhatsappIcon },
+                                        { key: 'x_url', label: 'X', Icon: XIcon },
+                                    ]
+                                        .filter(({ key, defaultUrl }) => {
+                                            const val = settings[key];
+                                            if (val && typeof val === 'string' && val.trim() !== '') return true;
+                                            if (defaultUrl && (val === undefined || val === null)) return true;
+                                            return false;
+                                        })
+                                        .map(({ key, label, Icon, defaultUrl }) => {
+                                            let link = (settings[key] || defaultUrl || '#').trim();
+                                            if (key === 'whatsapp_url' && link && !link.startsWith('http')) {
+                                                const digits = link.replace(/[^0-9]/g, '');
+                                                link = `https://wa.me/${digits}`;
+                                            }
+                                            return (
+                                                <a
+                                                    key={key}
+                                                    href={link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    aria-label={label}
+                                                    className="rounded-full border border-cream/15 p-2 sm:p-2.5 text-cream/60 transition-all duration-300 hover:border-bronze hover:bg-bronze hover:text-white"
+                                                >
+                                                    <Icon size={16} />
+                                                </a>
+                                            );
+                                        })}
                                 </div>
                             </div>
                         </div>
-                        {/* Explore */}
+                        {/* Quick Links */}
                         <div>
-                            <h3 className="font-serif-display mb-4 sm:mb-6 text-base sm:text-lg md:text-xl text-cream tracking-[0.02em]">Explore</h3>
-                            <ul className="grid grid-cols-2 gap-x-4 sm:gap-x-6 gap-y-2.5 sm:gap-y-3">
-                                {navLinks.map(({ label, href }) => (
+                            <h3 className="font-serif-display mb-4 sm:mb-6 text-base sm:text-lg md:text-xl text-cream tracking-[0.02em]">Quick Links</h3>
+                            <ul className="space-y-2.5 sm:space-y-3">
+                                {[
+                                    { label: 'Home', href: '/' },
+                                    { label: 'Our Products', href: '/products' },
+                                    { label: 'Portfolio', href: '/portfolio' },
+                                    { label: 'About Us', href: '/about' },
+                                    { label: 'Contact', href: '/contact' },
+                                ].map(({ label, href }) => (
                                     <li key={href}>
                                         <a href={href} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light inline-block py-0.5">
                                             {label}
@@ -384,10 +447,15 @@ export default function PublicLayout({ children, settings = {} }) {
                         <div>
                             <h3 className="font-serif-display mb-4 sm:mb-6 text-base sm:text-lg md:text-xl text-cream tracking-[0.02em]">Our Products</h3>
                             <ul className="space-y-2.5 sm:space-y-3">
-                                {['Bespoke Furniture', 'Architectural Lighting', 'Handcrafted Rugs & Textiles', 'Sculptural Ceramic & Decor'].map((label) => (
-                                    <li key={label}>
-                                        <a href="/products" className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light inline-block py-0.5">
-                                            {label}
+                                <li>
+                                    <a href="/products" className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light inline-block py-0.5">
+                                        All Products
+                                    </a>
+                                </li>
+                                {allProductCategories.map((cat) => (
+                                    <li key={cat}>
+                                        <a href={`/products?category=${encodeURIComponent(cat)}`} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light inline-block py-0.5">
+                                            {cat}
                                         </a>
                                     </li>
                                 ))}
@@ -405,16 +473,22 @@ export default function PublicLayout({ children, settings = {} }) {
                             </a>
                             <ul className="mt-5 sm:mt-6 space-y-3.5 sm:space-y-4">
                                 <li className="flex items-start gap-3">
+                                    <MapPin size={15} className="mt-0.5 shrink-0 text-bronze" />
+                                    <span className="text-xs sm:text-[13px] md:text-sm text-cream/65 leading-relaxed">
+                                        {settings.contact_address || 'Mohakhali, Dhaka, Bangladesh'}
+                                    </span>
+                                </li>
+                                <li className="flex items-start gap-3">
                                     <Phone size={15} className="mt-0.5 shrink-0 text-bronze" />
                                     <a href={`tel:${(settings.contact_phone || settings.phone || '01626778573').replace(/[^0-9+]/g, '')}`} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light break-words">
                                         {settings.contact_phone || settings.phone || '01626778573'}
                                     </a>
                                 </li>
-                                {(settings.contact_email || settings.email || 'contact@architexture.com') && (
+                                {(settings.contact_email || settings.email || 'contact@architexturebd.com') && (
                                     <li className="flex items-start gap-3">
                                         <Mail size={15} className="mt-0.5 shrink-0 text-bronze" />
-                                        <a href={`mailto:${settings.contact_email || settings.email || 'contact@architexture.com'}`} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light break-all sm:break-words">
-                                            {settings.contact_email || settings.email || 'contact@architexture.com'}
+                                        <a href={`mailto:${settings.contact_email || settings.email || 'contact@architexturebd.com'}`} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light break-all sm:break-words">
+                                            {settings.contact_email || settings.email || 'contact@architexturebd.com'}
                                         </a>
                                     </li>
                                 )}

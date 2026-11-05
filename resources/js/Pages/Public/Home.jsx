@@ -152,7 +152,7 @@ const DEFAULT_FEATURED_PRODUCTS = [
     {
         id: 4,
         name: 'Komorebi Hand-Knotted Wool Rug',
-        category: 'Textiles',
+        category: 'Decor',
         price: 125000,
         featured_image: 'https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=1000&q=80',
         summary: 'New Zealand wool and raw silk blend with subtle textural high-low carving in oatmeal tones.',
@@ -168,7 +168,7 @@ const DEFAULT_FEATURED_PRODUCTS = [
 ];
 
 function FeaturedProductsSection({ products = [] }) {
-    const displayProducts = Array.isArray(products) && products.length > 0 ? products.slice(0, 5) : DEFAULT_FEATURED_PRODUCTS;
+    const displayProducts = Array.isArray(products) && products.length > 0 ? products : DEFAULT_FEATURED_PRODUCTS;
 
     return (
         <section className="bg-white py-20 md:py-28 border-t border-sand/60 relative overflow-hidden">
@@ -184,8 +184,8 @@ function FeaturedProductsSection({ products = [] }) {
                     </p>
                 </div>
 
-                {/* 5 Products Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 sm:gap-6">
+                {/* Products Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 sm:gap-6">
                     {displayProducts.map((product) => (
                         <div
                             key={product.id}
@@ -583,14 +583,14 @@ function TestimonialsSection({ testimonials = [] }) {
     const list = testimonials.length > 0 ? testimonials : DEFAULT_TESTIMONIALS;
 
     return (
-        <section className="bg-[#FAF7F2] py-20 md:py-28 border-b border-sand/60">
+        <section id="client-stories" className="bg-[#FAF7F2] py-20 md:py-28 border-b border-sand/60 scroll-mt-20">
             <div className="mx-auto max-w-[1440px] px-6 md:px-10">
                 <div className="mb-14 text-center">
                     <p className="eyebrow mb-3">Client Stories</p>
                     <h2 className="font-serif-display text-4xl leading-tight text-charcoal md:text-5xl">Spaces Loved by Real Clients</h2>
                 </div>
 
-                <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {list.map((t, i) => (
                         <figure key={i} className="flex flex-col justify-between rounded-2xl border border-sand/80 bg-white p-8 shadow-sm hover:shadow-xl hover:border-bronze/40 transition-all duration-300">
                             <div>
@@ -604,9 +604,17 @@ function TestimonialsSection({ testimonials = [] }) {
                                 </blockquote>
                             </div>
                             <figcaption className="mt-6 flex items-center gap-3 border-t border-sand/70 pt-4">
-                                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-bronze/15 font-serif-display text-sm font-bold text-bronze">
-                                    {t.author_name ? t.author_name[0] : 'C'}
-                                </span>
+                                {t.avatar_path ? (
+                                    <img
+                                        src={t.avatar_path}
+                                        alt={t.author_name}
+                                        className="h-10 w-10 rounded-full object-cover border border-sand/80 shadow-2xs"
+                                    />
+                                ) : (
+                                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-bronze/15 font-serif-display text-sm font-bold text-bronze">
+                                        {t.author_name ? t.author_name[0] : 'C'}
+                                    </span>
+                                )}
                                 <div>
                                     <p className="text-sm font-medium text-charcoal">{t.author_name}</p>
                                     <p className="text-xs text-charcoal/50">{[t.author_role, t.company].filter(Boolean).join(' · ')}</p>

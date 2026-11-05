@@ -15,6 +15,7 @@ import {
     FileText,
     Image,
     MessageSquare,
+    MessageSquareQuote,
     Settings,
     Search,
     User,
@@ -25,6 +26,7 @@ import {
     ExternalLink,
     ChevronLeft,
     ChevronRight,
+    ArrowRight,
 } from 'lucide-react';
 
 const navItems = [
@@ -32,10 +34,8 @@ const navItems = [
     { label: 'Products & Catalog', href: '/admin/products', icon: Package },
     { label: 'Orders',             href: '/admin/orders',   icon: ShoppingBag, badge: 4 },
     { label: 'Portfolio Projects', href: '/admin/projects', icon: FolderKanban },
-    { label: 'Services',           href: '/admin/services', icon: Briefcase },
-    { label: 'Experience',         href: '/admin/experience', icon: ClipboardList },
+    { label: 'Client Stories',     href: '/admin/testimonials', icon: MessageSquareQuote },
     { label: 'Blog',               href: '/admin/blog',     icon: FileText },
-    { label: 'Media',              href: '/admin/media',    icon: Image },
     { label: 'Site & Notice Settings', href: '/admin/settings', icon: Settings },
 ];
 
@@ -118,20 +118,21 @@ export default function AdminLayout({ children, title }) {
                 {(!collapsed || mobile) ? (
                     <div className="flex items-center gap-3 rounded-xl px-2 py-1.5">
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#2563EB] text-white text-sm font-bold shadow-md shadow-blue-500/20">
-                            {user?.name?.[0]?.toUpperCase() ?? 'A'}
+                            {user?.name?.[0]?.toUpperCase() ?? 'S'}
                         </div>
                         <div className="min-w-0 flex-1">
-                            <p className="text-xs font-bold text-white truncate leading-tight">{user?.name || 'Archi Texture Admin'}</p>
+                            <p className="text-xs font-bold text-white truncate leading-tight">{user?.name || 'Studio Admin'}</p>
                             <p className="text-[11px] text-slate-400 truncate mt-0.5">{user?.email || 'admin@architexturebd.com'}</p>
                         </div>
                         <Link
                             href="/logout"
                             method="post"
                             as="button"
-                            className="text-slate-400 hover:text-white transition-colors p-1"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-500/20 px-2.5 py-1.5 rounded-lg transition-colors"
                             title="Logout"
                         >
-                            <LogOut size={16} />
+                            <span>Logout</span>
+                            <ArrowRight size={13} />
                         </Link>
                     </div>
                 ) : (
@@ -197,16 +198,6 @@ export default function AdminLayout({ children, title }) {
 
                     {/* Topbar Actions */}
                     <div className="flex items-center gap-3.5 shrink-0 ml-4">
-                        {/* Notification Bell */}
-                        <button
-                            type="button"
-                            className="relative flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
-                            title="Notifications"
-                        >
-                            <Bell size={18} />
-                            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
-                        </button>
-
                         {/* View Site Pill Button */}
                         <a
                             href="/"
@@ -226,10 +217,10 @@ export default function AdminLayout({ children, title }) {
                                 className="flex items-center gap-2 rounded-full border border-slate-200/80 bg-white p-1 pr-3 hover:bg-slate-50 transition shadow-2xs select-none"
                             >
                                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-600 text-white font-bold text-xs shadow-xs">
-                                    {user?.name?.[0]?.toUpperCase() ?? 'A'}
+                                    {user?.name?.[0]?.toUpperCase() ?? 'S'}
                                 </div>
                                 <span className="text-xs font-bold text-slate-700 hidden sm:inline-block max-w-[120px] truncate">
-                                    {user?.name || 'Admin'}
+                                    {user?.name || 'Studio Admin'}
                                 </span>
                             </button>
 
@@ -242,7 +233,7 @@ export default function AdminLayout({ children, title }) {
                                     />
                                     <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white border border-slate-200 p-2 shadow-xl z-50 animate-in fade-in zoom-in-95 duration-100">
                                         <div className="px-3 py-2 border-b border-slate-100">
-                                            <p className="text-xs font-bold text-slate-900 truncate">{user?.name || 'Archi Texture Admin'}</p>
+                                            <p className="text-xs font-bold text-slate-900 truncate">{user?.name || 'Studio Admin'}</p>
                                             <p className="text-[11px] text-slate-400 truncate mt-0.5">{user?.email || 'admin@architexturebd.com'}</p>
                                         </div>
 
@@ -262,28 +253,19 @@ export default function AdminLayout({ children, title }) {
                                                 href="/logout"
                                                 method="post"
                                                 as="button"
-                                                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition"
+                                                className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition"
                                             >
-                                                <LogOut size={15} />
-                                                <span>Log Out</span>
+                                                <div className="flex items-center gap-2">
+                                                    <LogOut size={15} />
+                                                    <span>Log Out</span>
+                                                </div>
+                                                <ArrowRight size={13} className="text-red-400" />
                                             </Link>
                                         </div>
                                     </div>
                                 </>
                             )}
                         </div>
-
-                        {/* Direct Logout Quick Pill Button */}
-                        <Link
-                            href="/logout"
-                            method="post"
-                            as="button"
-                            className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-red-200/80 bg-red-50/70 hover:bg-red-100/80 px-3 py-1.5 text-xs font-bold text-red-600 transition shadow-2xs"
-                            title="Log Out of Admin"
-                        >
-                            <LogOut size={13} />
-                            <span>Logout</span>
-                        </Link>
                     </div>
                 </header>
 

@@ -23,6 +23,7 @@ Route::get('/admin/login', fn () => redirect()->route('login'))->name('admin.log
 // Admin Routes
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/export/statement', [AdminController::class, 'exportStatement'])->name('exportStatement');
 
     // Orders Management
     Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
@@ -40,12 +41,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     Route::get('/products/{product}/edit', [AdminController::class, 'productEdit'])->name('products.edit');
     Route::put('/products/{product}', [AdminController::class, 'productUpdate'])->name('products.update');
     Route::patch('/products/{product}/stock', [AdminController::class, 'updateProductStock'])->name('products.stock');
+    Route::patch('/products/{product}/toggle-featured', [AdminController::class, 'toggleProductFeatured'])->name('products.toggleFeatured');
     Route::delete('/products/{product}', [AdminController::class, 'productDestroy'])->name('products.destroy');
 
     // Projects
     Route::get('/projects', [AdminController::class, 'projects'])->name('projects');
     Route::get('/projects/create', [AdminController::class, 'projectCreate'])->name('projects.create');
+    Route::post('/projects', [AdminController::class, 'projectStore'])->name('projects.store');
     Route::get('/projects/{project}/edit', [AdminController::class, 'projectEdit'])->name('projects.edit');
+    Route::put('/projects/{project}', [AdminController::class, 'projectUpdate'])->name('projects.update');
+    Route::delete('/projects/{project}', [AdminController::class, 'projectDestroy'])->name('projects.destroy');
 
     // Skills
     Route::get('/skills', [AdminController::class, 'skills'])->name('skills');
@@ -72,10 +77,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     Route::get('/certifications/create', [AdminController::class, 'certificationCreate'])->name('certifications.create');
     Route::get('/certifications/{certification}/edit', [AdminController::class, 'certificationEdit'])->name('certifications.edit');
 
-    // Testimonials
+    // Testimonials / Client Stories
     Route::get('/testimonials', [AdminController::class, 'testimonials'])->name('testimonials');
     Route::get('/testimonials/create', [AdminController::class, 'testimonialCreate'])->name('testimonials.create');
+    Route::post('/testimonials', [AdminController::class, 'testimonialStore'])->name('testimonials.store');
     Route::get('/testimonials/{testimonial}/edit', [AdminController::class, 'testimonialEdit'])->name('testimonials.edit');
+    Route::put('/testimonials/{testimonial}', [AdminController::class, 'testimonialUpdate'])->name('testimonials.update');
+    Route::delete('/testimonials/{testimonial}', [AdminController::class, 'testimonialDestroy'])->name('testimonials.destroy');
+    Route::patch('/testimonials/{testimonial}/toggle-featured', [AdminController::class, 'testimonialToggleFeatured'])->name('testimonials.toggleFeatured');
 
     // Blog
     Route::get('/blog', [AdminController::class, 'blog'])->name('blog');

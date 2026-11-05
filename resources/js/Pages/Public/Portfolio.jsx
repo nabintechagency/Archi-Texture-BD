@@ -1,138 +1,200 @@
 import PublicLayout from '@/Layouts/PublicLayout';
 import { Head } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
-import { Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Maximize2, X, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 
-const CATEGORIES = [
-    { name: 'Living Room', count: 3, tag: 'Sanctuary & Comfort' },
-    { name: 'Bedroom', count: 3, tag: 'Serenity & Rest' },
-    { name: 'Kitchen', count: 3, tag: 'Culinary Craft' },
-    { name: 'Bathroom', count: 3, tag: 'Spa & Wellness' },
-    { name: 'Office', count: 3, tag: 'Focus & Ambience' },
-    { name: 'Dining', count: 3, tag: 'Gathering & Warmth' },
+const FALLBACK_CATEGORIES = [
+    { name: 'Living Room', count: 3 },
+    { name: 'Bedroom', count: 3 },
+    { name: 'Kitchen', count: 3 },
+    { name: 'Bathroom', count: 3 },
+    { name: 'Office', count: 3 },
+    { name: 'Dining', count: 3 },
 ];
 
-const GALLERY = {
-    'Living Room': [
-        {
-            src: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80',
-            title: 'Nordic Minimalist Living Room',
-            subtitle: 'Warm oak paneling, boucle textures, and soft diffuse perimeter lighting.',
-        },
-        {
-            src: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80',
-            title: 'Sunlit Contemporary Lounge',
-            subtitle: 'Floor-to-ceiling glass integration with low-profile Belgian linen seating.',
-        },
-        {
-            src: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=80',
-            title: 'Modern Organic Penthouse',
-            subtitle: 'Curved architectural plaster wall and custom travertine coffee tables.',
-        },
-    ],
-    Bedroom: [
-        {
-            src: 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=1200&q=80',
-            title: 'Japandi Master Suite',
-            subtitle: 'Slatted cedar headboard with integrated warm bedside illumination.',
-        },
-        {
-            src: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
-            title: 'Earthy Minimal Bedroom',
-            subtitle: 'Textured lime wash walls, raw linen drapery, and woven wool rugs.',
-        },
-        {
-            src: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1200&q=80',
-            title: 'Boutique Loft Retreat',
-            subtitle: 'Exposed structural concrete juxtaposed with plush cashmere accents.',
-        },
-    ],
-    Kitchen: [
-        {
-            src: 'https://images.unsplash.com/photo-1556912167-f556f1f39fdf?auto=format&fit=crop&w=1200&q=80',
-            title: 'Monolithic Marble Kitchen Island',
-            subtitle: 'Calacatta Viola marble, handleless smoked walnut cabinetry, and bronze hardware.',
-        },
-        {
-            src: 'https://images.unsplash.com/photo-1600489000022-c2086d79f9d4?auto=format&fit=crop&w=1200&q=80',
-            title: 'Scandi Open-Plan Culinary Space',
-            subtitle: 'Fluted glass upper cabinets, integrated quartz splashback, and pendant array.',
-        },
-        {
-            src: 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=1200&q=80',
-            title: 'Minimalist Matte Anthracite Kitchen',
-            subtitle: 'Hidden prep pantry, flush induction cooking, and architectural linear lighting.',
-        },
-    ],
-    Bathroom: [
-        {
-            src: 'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=80',
-            title: 'Terrazzo & Brass Sanctuary',
-            subtitle: 'Custom dual vessel basin with wall-mounted brushed champagne fixtures.',
-        },
-        {
-            src: 'https://images.unsplash.com/photo-1620626011761-996317b8d101?auto=format&fit=crop&w=1200&q=80',
-            title: 'Sculptural Freestanding Bath Suite',
-            subtitle: 'Seamless micro-cement walls and concealed ambient niche lighting.',
-        },
-        {
-            src: 'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&fit=crop&w=1200&q=80',
-            title: 'Japanese Hinoki Wet Room',
-            subtitle: 'Cedar bath slats, rainfall shower fixture, and natural stone drainage.',
-        },
-    ],
-    Office: [
-        {
-            src: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=1200&q=80',
-            title: 'Executive Walnut Study',
-            subtitle: 'Built-in library shelving with concealed LED strips and leather desk pad.',
-        },
-        {
-            src: 'https://images.unsplash.com/photo-1593062096033-9a26b09da705?auto=format&fit=crop&w=1200&q=80',
-            title: 'Minimalist Creative Atelier',
-            subtitle: 'Dual ergonomic workstation setup surrounded by natural botanical elements.',
-        },
-        {
-            src: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=80',
-            title: 'Architectural Design Studio',
-            subtitle: 'High ceilings, acoustic wall baffling, and oversized drafting surfaces.',
-        },
-    ],
-    Dining: [
-        {
-            src: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=1200&q=80',
-            title: 'Formal Architectural Dining Hall',
-            subtitle: 'Solid smoked oak dining table with sculptural ceramic pendant centerpiece.',
-        },
-        {
-            src: 'https://images.unsplash.com/photo-1615968679312-9b7ed9f04e79?auto=format&fit=crop&w=1200&q=80',
-            title: 'Casual Light-Filled Breakfast Nook',
-            subtitle: 'Custom curved banquette upholstered in stain-resistant performance linen.',
-        },
-        {
-            src: 'https://images.unsplash.com/photo-1595514535215-9a5e0e8e04be?auto=format&fit=crop&w=1200&q=80',
-            title: 'Warm Bronze Entertaining Space',
-            subtitle: 'Integrated wine storage wall, fluted bronze credenza, and velvet dining chairs.',
-        },
-    ],
-};
+const FALLBACK_GALLERY = [
+    {
+        category: 'Living Room',
+        src: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80',
+        title: 'Nordic Minimalist Living Room',
+        subtitle: 'Warm oak paneling, boucle textures, and soft diffuse perimeter lighting.',
+    },
+    {
+        category: 'Living Room',
+        src: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80',
+        title: 'Sunlit Contemporary Lounge',
+        subtitle: 'Floor-to-ceiling glass integration with low-profile Belgian linen seating.',
+    },
+    {
+        category: 'Living Room',
+        src: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=80',
+        title: 'Modern Organic Penthouse',
+        subtitle: 'Curved architectural plaster wall and custom travertine coffee tables.',
+    },
+    {
+        category: 'Bedroom',
+        src: 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=1200&q=80',
+        title: 'Japandi Master Suite',
+        subtitle: 'Slatted cedar headboard with integrated warm bedside illumination.',
+    },
+    {
+        category: 'Bedroom',
+        src: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
+        title: 'Earthy Minimal Bedroom',
+        subtitle: 'Textured lime wash walls, raw linen drapery, and woven wool rugs.',
+    },
+    {
+        category: 'Bedroom',
+        src: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1200&q=80',
+        title: 'Boutique Loft Retreat',
+        subtitle: 'Exposed structural concrete juxtaposed with plush cashmere accents.',
+    },
+    {
+        category: 'Kitchen',
+        src: 'https://images.unsplash.com/photo-1556912167-f556f1f39fdf?auto=format&fit=crop&w=1200&q=80',
+        title: 'Monolithic Marble Kitchen Island',
+        subtitle: 'Calacatta Viola marble, handleless smoked walnut cabinetry, and bronze hardware.',
+    },
+    {
+        category: 'Kitchen',
+        src: 'https://images.unsplash.com/photo-1600489000022-c2086d79f9d4?auto=format&fit=crop&w=1200&q=80',
+        title: 'Scandi Open-Plan Culinary Space',
+        subtitle: 'Fluted glass upper cabinets, integrated quartz splashback, and pendant array.',
+    },
+    {
+        category: 'Kitchen',
+        src: 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=1200&q=80',
+        title: 'Minimalist Matte Anthracite Kitchen',
+        subtitle: 'Hidden prep pantry, flush induction cooking, and architectural linear lighting.',
+    },
+    {
+        category: 'Bathroom',
+        src: 'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=80',
+        title: 'Terrazzo & Brass Sanctuary',
+        subtitle: 'Custom dual vessel basin with wall-mounted brushed champagne fixtures.',
+    },
+    {
+        category: 'Bathroom',
+        src: 'https://images.unsplash.com/photo-1620626011761-996317b8d101?auto=format&fit=crop&w=1200&q=80',
+        title: 'Sculptural Freestanding Bath Suite',
+        subtitle: 'Seamless micro-cement walls and concealed ambient niche lighting.',
+    },
+    {
+        category: 'Bathroom',
+        src: 'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&fit=crop&w=1200&q=80',
+        title: 'Japanese Hinoki Wet Room',
+        subtitle: 'Cedar bath slats, rainfall shower fixture, and natural stone drainage.',
+    },
+    {
+        category: 'Office',
+        src: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=1200&q=80',
+        title: 'Executive Walnut Study',
+        subtitle: 'Built-in library shelving with concealed LED strips and leather desk pad.',
+    },
+    {
+        category: 'Office',
+        src: 'https://images.unsplash.com/photo-1593062096033-9a26b09da705?auto=format&fit=crop&w=1200&q=80',
+        title: 'Minimalist Creative Atelier',
+        subtitle: 'Dual ergonomic workstation setup surrounded by natural botanical elements.',
+    },
+    {
+        category: 'Office',
+        src: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=80',
+        title: 'Architectural Design Studio',
+        subtitle: 'High ceilings, acoustic wall baffling, and oversized drafting surfaces.',
+    },
+    {
+        category: 'Dining',
+        src: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=1200&q=80',
+        title: 'Formal Architectural Dining Hall',
+        subtitle: 'Solid smoked oak dining table with sculptural ceramic pendant centerpiece.',
+    },
+    {
+        category: 'Dining',
+        src: 'https://images.unsplash.com/photo-1615968679312-9b7ed9f04e79?auto=format&fit=crop&w=1200&q=80',
+        title: 'Casual Light-Filled Breakfast Nook',
+        subtitle: 'Custom curved banquette upholstered in stain-resistant performance linen.',
+    },
+    {
+        category: 'Dining',
+        src: 'https://images.unsplash.com/photo-1595514535215-9a5e0e8e04be?auto=format&fit=crop&w=1200&q=80',
+        title: 'Warm Bronze Entertaining Space',
+        subtitle: 'Integrated wine storage wall, fluted bronze credenza, and velvet dining chairs.',
+    },
+];
 
-export default function Portfolio({ projects = [], settings = {} }) {
-    const [selectedCat, setSelectedCat] = useState('Living Room');
+export default function Portfolio({ projects = [], categories = [], settings = {} }) {
+    // Process all live database projects or fallback
+    const allItems = useMemo(() => {
+        if (projects && projects.length > 0) {
+            return projects.map((p) => ({
+                id: p.id,
+                category: p.category || 'General',
+                src: p.featured_image || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80',
+                title: p.title,
+                subtitle: p.summary || p.description || '',
+            }));
+        }
+        return FALLBACK_GALLERY;
+    }, [projects]);
+
+    // Compute dynamic categories and item counts
+    const categoryList = useMemo(() => {
+        const counts = {};
+        allItems.forEach((item) => {
+            const cat = item.category || 'General';
+            counts[cat] = (counts[cat] || 0) + 1;
+        });
+
+        const distinctNames = Object.keys(counts);
+
+        // Include any additional categories passed from controller if not already present
+        (categories || []).forEach((c) => {
+            if (!counts[c]) {
+                counts[c] = 0;
+                distinctNames.push(c);
+            }
+        });
+
+        const list = distinctNames.map((name) => ({
+            name,
+            count: counts[name] || 0,
+        }));
+
+        return [
+            { name: 'All Spaces', count: allItems.length },
+            ...list,
+        ];
+    }, [allItems, categories]);
+
+    const [selectedCat, setSelectedCat] = useState('All Spaces');
     const [activeImageIndex, setActiveImageIndex] = useState(null);
 
-    // Sync category from URL param if present
+    // Sync category from URL param if present on load or change
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const cat = params.get('category');
-        if (cat && CATEGORIES.some((c) => c.name.toLowerCase() === cat.toLowerCase())) {
-            const found = CATEGORIES.find((c) => c.name.toLowerCase() === cat.toLowerCase());
-            if (found) setSelectedCat(found.name);
+        if (cat) {
+            const found = categoryList.find(
+                (c) => c.name.toLowerCase() === cat.toLowerCase()
+            );
+            if (found) {
+                setSelectedCat(found.name);
+            } else {
+                setSelectedCat(cat);
+            }
         }
-    }, []);
+    }, [categoryList]);
 
-    const currentItems = GALLERY[selectedCat] || GALLERY['Living Room'];
-    const activeCategoryObj = CATEGORIES.find((c) => c.name === selectedCat) || CATEGORIES[0];
+    // Filter items based on selected category
+    const currentItems = useMemo(() => {
+        if (!selectedCat || selectedCat === 'All Spaces' || selectedCat.toLowerCase() === 'all') {
+            return allItems;
+        }
+        return allItems.filter(
+            (item) => item.category.toLowerCase() === selectedCat.toLowerCase()
+        );
+    }, [allItems, selectedCat]);
 
     const openLightbox = (index) => setActiveImageIndex(index);
     const closeLightbox = () => setActiveImageIndex(null);
@@ -155,14 +217,24 @@ export default function Portfolio({ projects = [], settings = {} }) {
             <section className="border-b border-sand bg-cream/70 py-4 sm:py-6">
                 <div className="mx-auto max-w-[1440px] px-4 md:px-10">
                     <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-                        <h1 className="font-serif-display text-2xl font-medium tracking-tight text-charcoal sm:text-3xl">
-                            Architectural Portfolio
-                        </h1>
+                        <div className="flex items-center gap-3">
+                            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-bronze/10 text-bronze">
+                                <Layers size={18} />
+                            </span>
+                            <div>
+                                <h1 className="font-serif-display text-2xl font-medium tracking-tight text-charcoal sm:text-3xl">
+                                    Architectural Portfolio
+                                </h1>
+                                <p className="text-[11px] uppercase tracking-[0.14em] text-charcoal/50 mt-0.5">
+                                    Curated Atelier Works & Interior Spaces
+                                </p>
+                            </div>
+                        </div>
 
-                        {/* Interactive Category Filter Pills */}
-                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none sm:gap-2">
-                            {CATEGORIES.map((cat) => {
-                                const isSelected = selectedCat === cat.name;
+                        {/* Interactive Dynamic Category Filter Pills */}
+                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none sm:gap-2 max-w-full">
+                            {categoryList.map((cat) => {
+                                const isSelected = selectedCat.toLowerCase() === cat.name.toLowerCase();
                                 return (
                                     <button
                                         key={cat.name}
@@ -189,63 +261,79 @@ export default function Portfolio({ projects = [], settings = {} }) {
                 </div>
             </section>
 
-            {/* Gallery Grid Section - Above the Fold */}
-            <section className="bg-white py-6 md:py-8">
+            {/* Gallery Grid Section */}
+            <section className="bg-white py-6 md:py-8 min-h-[50vh]">
                 <div className="mx-auto max-w-[1440px] px-4 md:px-10">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:gap-6">
-                        {currentItems.map((item, idx) => (
-                            <div
-                                key={`${selectedCat}-${idx}`}
-                                onClick={() => openLightbox(idx)}
-                                className="group relative cursor-pointer overflow-hidden rounded-sm border border-sand bg-cream shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-lg"
+                    {currentItems.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:gap-6">
+                            {currentItems.map((item, idx) => (
+                                <div
+                                    key={`${item.id || idx}-${item.title}`}
+                                    onClick={() => openLightbox(idx)}
+                                    className="group relative cursor-pointer overflow-hidden rounded-sm border border-sand bg-cream shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-lg"
+                                >
+                                    {/* Image Container */}
+                                    <div className="relative aspect-[16/11] w-full overflow-hidden bg-charcoal/5">
+                                        <img
+                                            src={item.src}
+                                            alt={item.title}
+                                            loading="eager"
+                                            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+                                        {/* Zoom Icon Button */}
+                                        <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-charcoal opacity-0 shadow-md backdrop-blur-sm transition-all duration-300 group-hover:opacity-100 hover:bg-bronze hover:text-white">
+                                            <Maximize2 size={14} />
+                                        </div>
+
+                                        {/* Hover Details Overlay */}
+                                        <div className="absolute inset-x-0 bottom-0 p-4 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                                            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-bronze-light">Click to expand</p>
+                                            <h3 className="font-serif-display text-base font-medium leading-snug">{item.title}</h3>
+                                        </div>
+                                    </div>
+
+                                    {/* Content Below Image */}
+                                    <div className="p-4">
+                                        <div className="flex items-center justify-between gap-2">
+                                            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-bronze">{item.category}</span>
+                                            <span className="text-[10px] text-charcoal/40">Concept 0{idx + 1}</span>
+                                        </div>
+                                        <h2 className="font-serif-display mt-0.5 text-base font-medium text-charcoal transition-colors group-hover:text-bronze">
+                                            {item.title}
+                                        </h2>
+                                        {item.subtitle && (
+                                            <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-charcoal/65">
+                                                {item.subtitle}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="py-20 text-center">
+                            <p className="text-sm text-charcoal/50">
+                                No projects published in this category yet.
+                            </p>
+                            <button
+                                onClick={() => setSelectedCat('All Spaces')}
+                                className="mt-3 text-xs font-semibold text-bronze hover:underline"
                             >
-                                {/* Image Container */}
-                                <div className="relative aspect-[16/11] w-full overflow-hidden bg-charcoal/5">
-                                    <img
-                                        src={item.src}
-                                        alt={item.title}
-                                        loading="eager"
-                                        className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                                View all spaces
+                            </button>
+                        </div>
+                    )}
 
-                                    {/* Zoom Icon Button */}
-                                    <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-charcoal opacity-0 shadow-md backdrop-blur-sm transition-all duration-300 group-hover:opacity-100 hover:bg-bronze hover:text-white">
-                                        <Maximize2 size={14} />
-                                    </div>
-
-                                    {/* Hover Details Overlay */}
-                                    <div className="absolute inset-x-0 bottom-0 p-4 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                                        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-bronze-light">Click to expand</p>
-                                        <h3 className="font-serif-display text-base font-medium leading-snug">{item.title}</h3>
-                                    </div>
-                                </div>
-
-                                {/* Content Below Image */}
-                                <div className="p-4">
-                                    <div className="flex items-center justify-between gap-2">
-                                        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-bronze">{selectedCat}</span>
-                                        <span className="text-[10px] text-charcoal/40">Concept 0{idx + 1}</span>
-                                    </div>
-                                    <h2 className="font-serif-display mt-0.5 text-base font-medium text-charcoal transition-colors group-hover:text-bronze">
-                                        {item.title}
-                                    </h2>
-                                    <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-charcoal/65">
-                                        {item.subtitle}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Bottom CTA */}
+                    {/* Bottom Call to Action */}
                     <div className="mt-10 rounded-sm border border-sand bg-cream/40 p-6 text-center sm:p-10">
-                        <p className="eyebrow mb-1.5">Tailored Spaces</p>
+                        <p className="eyebrow mb-1.5">Tailored Spatial Architecture</p>
                         <h2 className="font-serif-display text-xl font-medium text-charcoal sm:text-2xl md:text-3xl">
-                            Ready to Transform Your {selectedCat}?
+                            Ready to Transform Your {selectedCat === 'All Spaces' ? 'Space' : selectedCat}?
                         </h2>
                         <p className="mx-auto mt-2 max-w-lg text-xs leading-relaxed text-charcoal/70 sm:text-sm">
-                            Our designers curate bespoke layouts, customized material palettes, and artisan furnishings suited to your exact lifestyle.
+                            Our studio curates bespoke architectural layouts, customized material palettes, and artisan furnishings suited to your exact lifestyle.
                         </p>
                         <div className="mt-5 flex flex-wrap justify-center gap-3">
                             <a
@@ -311,7 +399,7 @@ export default function Portfolio({ projects = [], settings = {} }) {
                             <div className="flex items-center justify-between gap-4">
                                 <div>
                                     <span className="text-xs font-semibold uppercase tracking-[0.16em] text-bronze-light">
-                                        {selectedCat} · Concept 0{activeImageIndex + 1} of 0{currentItems.length}
+                                        {currentItems[activeImageIndex].category} · Space 0{activeImageIndex + 1} of 0{currentItems.length}
                                     </span>
                                     <h3 className="font-serif-display mt-1 text-xl font-medium sm:text-2xl">
                                         {currentItems[activeImageIndex].title}
@@ -324,9 +412,11 @@ export default function Portfolio({ projects = [], settings = {} }) {
                                     Inquire Look
                                 </a>
                             </div>
-                            <p className="mt-2 text-xs leading-relaxed text-white/70 sm:text-sm">
-                                {currentItems[activeImageIndex].subtitle}
-                            </p>
+                            {currentItems[activeImageIndex].subtitle && (
+                                <p className="mt-2 text-xs leading-relaxed text-white/70 sm:text-sm">
+                                    {currentItems[activeImageIndex].subtitle}
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -334,4 +424,3 @@ export default function Portfolio({ projects = [], settings = {} }) {
         </PublicLayout>
     );
 }
-

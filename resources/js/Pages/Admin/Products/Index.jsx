@@ -6,14 +6,13 @@ import {
     XCircle, Edit, Trash2, ArrowUpDown, DollarSign, Layers,
     Copy, Check, ExternalLink, RefreshCw, LayoutGrid, List,
     SlidersHorizontal, Eye, ChevronDown, CheckSquare, Sparkles,
-    Tag, FolderPlus, Upload, Image as ImageIcon, Percent
+    Tag, FolderPlus, Upload, Image as ImageIcon, Percent, Star
 } from 'lucide-react';
 
 const PRESET_CATEGORIES = [
     'All Categories',
     'Furniture',
     'Lighting',
-    'Textiles',
     'Decor',
     'Architectural Hardware',
     'Acoustic Paneling',
@@ -21,10 +20,11 @@ const PRESET_CATEGORIES = [
     'Custom Joinery'
 ];
 
-export default function ProductsIndex({ products, inventoryStats = {}, categories = [], filters = {} }) {
+export default function ProductsIndex({ products, inventoryStats = {}, categories = [], categoryCounts = {}, filters = {} }) {
     const [search, setSearch] = useState(filters.search || '');
     const [statusFilter, setStatusFilter] = useState(filters.status || '');
     const [categoryFilter, setCategoryFilter] = useState(filters.category || '');
+    const [featuredFilter, setFeaturedFilter] = useState(filters.featured || '');
     const [viewMode, setViewMode] = useState('inventory'); // 'inventory' or 'catalog'
     const [copiedSku, setCopiedSku] = useState(null);
     const [updatingStockId, setUpdatingStockId] = useState(null);
@@ -43,6 +43,7 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
         stock_quantity: 10,
         sku: '',
         status: 'published',
+        is_featured: false,
         featured_image: '',
         summary: '',
     });
@@ -73,20 +74,43 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
             search,
             status: statusFilter,
             category: categoryFilter,
+            featured: featuredFilter,
         }, { preserveState: true, replace: true });
     };
 
     const handleFilterChange = (key, val) => {
+        let nextFeatured = featuredFilter;
+        let nextStatus = statusFilter;
+        let nextCategory = categoryFilter;
+
+        if (key === 'status') {
+            nextStatus = val;
+            setStatusFilter(val);
+        }
+        if (key === 'category') {
+            const nextVal = val === 'All Categories' ? '' : val;
+            nextCategory = nextVal;
+            setCategoryFilter(nextVal);
+        }
+        if (key === 'featured') {
+            nextFeatured = val;
+            setFeaturedFilter(val);
+        }
+
         const nextFilters = {
             search,
-            status: statusFilter,
-            category: categoryFilter,
-            [key]: val === 'All Categories' ? '' : val,
+            status: nextStatus,
+            category: nextCategory,
+            featured: nextFeatured,
         };
-        if (key === 'status') setStatusFilter(val);
-        if (key === 'category') setCategoryFilter(val === 'All Categories' ? '' : val);
 
         router.get('/admin/products', nextFilters, { preserveState: true, replace: true });
+    };
+
+    const handleToggleFeatured = (product) => {
+        router.patch(`/admin/products/${product.id}/toggle-featured`, {}, {
+            preserveScroll: true,
+        });
     };
 
     const handleCopySku = (sku) => {
@@ -192,6 +216,7 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
             stock_quantity: product.stock_quantity ?? 10,
             sku: product.sku || '',
             status: product.status || 'published',
+            is_featured: Boolean(product.is_featured),
             featured_image: product.featured_image || '',
             summary: product.summary || '',
         });
@@ -260,7 +285,7 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
         if (quickForm.summary) formData.append('summary', quickForm.summary);
         formData.append('description', editingProduct?.description || quickForm.summary || '');
         formData.append('sort_order', editingProduct?.sort_order || 0);
-        formData.append('is_featured', editingProduct?.is_featured ? '1' : '0');
+        formData.append('is_featured', quickForm.is_featured ? '1' : '0');
 
         if (selectedPhotoFile) {
             formData.append('image_file', selectedPhotoFile);
@@ -285,7 +310,8 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
     };
 
     // Category lists combination
-    const allKnownCategories = Array.from(new Set([...PRESET_CATEGORIES.slice(1), ...categories]));
+    const allKnownCategories = Array.from(new Set([...PRESET_CATEGORIES.slice(1), ...categories]))
+        .filter(c => c && !c.toLowerCase().includes('textile'));
 
     return (
         <AdminLayout title="Products & Catalog Management">
@@ -351,7 +377,7 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
                 </div>
 
                 {/* 2. Top Metric KPI Row */}
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                     <div className="rounded-2xl bg-white border border-slate-100 p-5 shadow-xs">
                         <span className="text-xs font-medium text-slate-500 block">Total Catalog Items</span>
                         <div className="mt-1.5 text-2xl font-extrabold text-slate-900 tracking-tight">
@@ -369,7 +395,7 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
                     </div>
 
                     <div
-                        onClick={() => handleFilterChange('status', 'low_stock')}
+                        onClick={() => handleFilterChange('status', statusFilter === 'low_stock' ? '' : 'low_stock')}
                         className={`rounded-2xl border p-5 shadow-xs cursor-pointer transition ${
                             statusFilter === 'low_stock' ? 'bg-amber-50 border-amber-300' : 'bg-white border-slate-100 hover:border-amber-200'
                         }`}
@@ -382,6 +408,22 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
                             {inventoryStats.low_stock ?? 0}
                         </div>
                         <span className="text-[11px] text-slate-400 mt-1 block">1 to 5 units remaining</span>
+                    </div>
+
+                    <div
+                        onClick={() => handleFilterChange('featured', featuredFilter === '1' ? '' : '1')}
+                        className={`rounded-2xl border p-5 shadow-xs cursor-pointer transition ${
+                            featuredFilter === '1' ? 'bg-amber-50 border-amber-400 shadow-sm' : 'bg-white border-slate-100 hover:border-amber-300'
+                        }`}
+                    >
+                        <span className="text-xs font-medium text-amber-800 block flex items-center justify-between">
+                            Signature Collection
+                            <Star size={13} className="fill-amber-500 text-amber-500" />
+                        </span>
+                        <div className="mt-1.5 text-2xl font-extrabold text-amber-600 tracking-tight">
+                            {inventoryStats.featured ?? 0}
+                        </div>
+                        <span className="text-[11px] text-slate-400 mt-1 block">Featured on Homepage</span>
                     </div>
 
                     <div className="rounded-2xl bg-white border border-slate-100 p-5 shadow-xs">
@@ -398,43 +440,95 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
                     <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                             <Tag size={13} className="text-violet-600" />
-                            Filter by Category
+                            Filter by Category & Collections
                         </span>
-                        {categoryFilter && (
+                        {(categoryFilter || featuredFilter) && (
                             <button
-                                onClick={() => handleFilterChange('category', '')}
+                                onClick={() => {
+                                    setCategoryFilter('');
+                                    setFeaturedFilter('');
+                                    router.get('/admin/products', { search, status: statusFilter }, { preserveState: true, replace: true });
+                                }}
                                 className="text-[11px] font-semibold text-violet-600 hover:text-violet-800"
                             >
-                                Clear Category
+                                Clear Filters
                             </button>
                         )}
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
                         <button
-                            onClick={() => handleFilterChange('category', '')}
-                            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition ${
-                                !categoryFilter
+                            onClick={() => {
+                                if (categoryFilter || featuredFilter) {
+                                    setCategoryFilter('');
+                                    setFeaturedFilter('');
+                                    router.get('/admin/products', { search, status: statusFilter }, { preserveState: true, replace: true });
+                                }
+                            }}
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
+                                !categoryFilter && !featuredFilter
                                     ? 'bg-violet-600 text-white shadow-xs'
                                     : 'bg-slate-50 border border-slate-200/80 text-slate-600 hover:bg-slate-100'
                             }`}
                         >
-                            All Pieces ({inventoryStats.total_products ?? 0})
+                            <span>All Pieces</span>
+                            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                                !categoryFilter && !featuredFilter
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-slate-200 text-slate-700'
+                            }`}>
+                                {inventoryStats.total_products ?? 0}
+                            </span>
+                        </button>
+
+                        {/* Signature Collection Featured Filter Tab */}
+                        <button
+                            onClick={() => handleFilterChange('featured', featuredFilter === '1' ? '' : '1')}
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                                featuredFilter === '1'
+                                    ? 'bg-amber-500 text-white shadow-xs'
+                                    : 'bg-amber-50 border border-amber-200 text-amber-900 hover:bg-amber-100'
+                            }`}
+                        >
+                            <Star size={13} className={featuredFilter === '1' ? 'fill-white text-white' : 'fill-amber-500 text-amber-500'} />
+                            <span>Signature Collection</span>
+                            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                                featuredFilter === '1'
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-amber-200 text-amber-900'
+                            }`}>
+                                {inventoryStats.featured ?? 0}
+                            </span>
                         </button>
 
                         {allKnownCategories.map((cat) => {
                             const isSelected = categoryFilter.toLowerCase() === cat.toLowerCase();
+                            // Case-insensitive match for category counts
+                            const matchedKey = Object.keys(categoryCounts).find(
+                                (k) => k.toLowerCase() === cat.toLowerCase()
+                            );
+                            const count = matchedKey ? categoryCounts[matchedKey] : (categoryCounts[cat] ?? 0);
+
                             return (
                                 <button
                                     key={cat}
                                     onClick={() => handleFilterChange('category', cat)}
-                                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition ${
+                                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
                                         isSelected
                                             ? 'bg-violet-600 text-white shadow-xs'
                                             : 'bg-slate-50 border border-slate-200/80 text-slate-600 hover:bg-slate-100'
                                     }`}
                                 >
-                                    {cat}
+                                    <span>{cat}</span>
+                                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                                        isSelected
+                                            ? 'bg-white/20 text-white'
+                                            : count > 0
+                                            ? 'bg-violet-100 text-violet-700'
+                                            : 'bg-slate-200 text-slate-400'
+                                    }`}>
+                                        {count}
+                                    </span>
                                 </button>
                             );
                         })}
@@ -495,6 +589,7 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
                                         <th className="py-3.5 px-4">Category</th>
                                         <th className="py-3.5 px-4">Price & Discount</th>
                                         <th className="py-3.5 px-4">Stock Level</th>
+                                        <th className="py-3.5 px-4">Signature Collection</th>
                                         <th className="py-3.5 px-4">Status</th>
                                         <th className="py-3.5 pl-4 pr-6 text-right">Actions</th>
                                     </tr>
@@ -620,7 +715,27 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
                                                         </div>
                                                     </td>
 
-                                                    {/* Column 5: Status */}
+                                                    {/* Column 5: Signature Collection Featured Toggle */}
+                                                    <td className="py-4 px-4 align-middle whitespace-nowrap">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleToggleFeatured(item)}
+                                                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold transition shadow-2xs ${
+                                                                item.is_featured
+                                                                    ? 'bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200'
+                                                                    : 'bg-slate-100 text-slate-500 border border-slate-200/60 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200'
+                                                            }`}
+                                                            title={item.is_featured ? 'Featured on Homepage (Click to remove)' : 'Standard (Click to feature on Homepage)'}
+                                                        >
+                                                            <Star
+                                                                size={12}
+                                                                className={item.is_featured ? 'fill-amber-500 text-amber-500' : 'text-slate-400'}
+                                                            />
+                                                            <span>{item.is_featured ? 'Featured' : 'Standard'}</span>
+                                                        </button>
+                                                    </td>
+
+                                                    {/* Column 6: Status */}
                                                     <td className="py-4 px-4 align-middle whitespace-nowrap">
                                                         <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
                                                             item.status === 'published'
@@ -631,7 +746,7 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
                                                         </span>
                                                     </td>
 
-                                                    {/* Column 6: Actions */}
+                                                    {/* Column 7: Actions */}
                                                     <td className="py-4 pl-4 pr-6 align-middle text-right whitespace-nowrap">
                                                         <div className="inline-flex items-center gap-1.5">
                                                             <button
@@ -666,7 +781,7 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
                                         })
                                     ) : (
                                         <tr>
-                                            <td colSpan={6} className="py-12 text-center text-slate-400">
+                                            <td colSpan={7} className="py-12 text-center text-slate-400">
                                                 No architectural products found matching your filter criteria.
                                             </td>
                                         </tr>
@@ -696,6 +811,7 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
                                                 No Image Provided
                                             </div>
                                         )}
+                                        {/* Category & Discount Badges */}
                                         <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5">
                                             <span className="rounded-full bg-white/90 backdrop-blur-xs px-2.5 py-0.5 text-[11px] font-bold text-violet-700 shadow-2xs">
                                                 {item.category || 'General'}
@@ -706,6 +822,24 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
                                                 </span>
                                             )}
                                         </div>
+
+                                        {/* 1-Click Signature Collection Star Toggle */}
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                handleToggleFeatured(item);
+                                            }}
+                                            className={`absolute top-2.5 right-2.5 z-10 rounded-full p-2 transition shadow-md ${
+                                                item.is_featured
+                                                    ? 'bg-amber-400 text-amber-950 hover:bg-amber-500 ring-2 ring-white'
+                                                    : 'bg-white/90 text-slate-400 hover:text-amber-600 hover:bg-white'
+                                            }`}
+                                            title={item.is_featured ? 'Featured in Signature Collection (Click to unfeature)' : 'Feature in Signature Collection'}
+                                        >
+                                            <Star size={14} className={item.is_featured ? 'fill-amber-950 text-amber-950' : ''} />
+                                        </button>
                                     </div>
 
                                     <div className="p-4 space-y-1.5">
@@ -722,7 +856,15 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
                                                 </span>
                                             </div>
                                         </div>
-                                        <h3 className="font-bold text-slate-900 text-sm line-clamp-1">{item.name}</h3>
+                                        <div className="flex items-center gap-1.5">
+                                            <h3 className="font-bold text-slate-900 text-sm line-clamp-1">{item.name}</h3>
+                                            {item.is_featured && (
+                                                <span className="shrink-0 inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded-full">
+                                                    <Star size={10} className="fill-amber-500 text-amber-500" />
+                                                    Featured
+                                                </span>
+                                            )}
+                                        </div>
                                         <p className="text-xs text-slate-500 line-clamp-2">
                                             {item.summary || item.description || 'No summary text.'}
                                         </p>
@@ -993,6 +1135,28 @@ export default function ProductsIndex({ products, inventoryStats = {}, categorie
                                     placeholder="Brief specifications, material, dimensions..."
                                     className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-violet-500 resize-none"
                                 />
+                            </div>
+
+                            {/* Feature in Signature Collection Toggle */}
+                            <div className="flex items-center justify-between p-3.5 rounded-xl bg-amber-50/70 border border-amber-200">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="h-8 w-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                                        <Star size={16} className={quickForm.is_featured ? "fill-amber-600 text-amber-600" : "text-amber-600"} />
+                                    </div>
+                                    <div>
+                                        <span className="block font-bold text-slate-900 text-xs">Featured in Signature Collection</span>
+                                        <span className="text-[11px] text-slate-500">Highlight this piece on the website homepage</span>
+                                    </div>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={quickForm.is_featured}
+                                        onChange={(e) => setQuickForm({ ...quickForm, is_featured: e.target.checked })}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+                                </label>
                             </div>
 
                             {/* Submit buttons */}

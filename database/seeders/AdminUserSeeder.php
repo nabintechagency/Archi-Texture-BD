@@ -13,7 +13,7 @@ class AdminUserSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'admin@architexturebd.com'],
             [
-                'name'              => 'Archi Texture Admin',
+                'name'              => 'Studio Admin',
                 'password'          => Hash::make('admin123'),
                 'role'              => 'admin',
                 'email_verified_at' => now(),

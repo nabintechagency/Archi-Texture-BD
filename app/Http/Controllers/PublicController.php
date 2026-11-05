@@ -24,12 +24,17 @@ class PublicController extends Controller
 
     public function home(): Response
     {
+        $testimonials = Testimonial::where('is_featured', true)->orderBy('sort_order')->orderByDesc('id')->get();
+        if ($testimonials->isEmpty()) {
+            $testimonials = Testimonial::orderBy('sort_order')->orderByDesc('id')->get();
+        }
+
         return Inertia::render('Public/Home', [
             'projects'     => Project::where('status', 'published')->where('is_featured', true)->with('skills')->orderBy('sort_order')->take(6)->get(),
             'skills'       => Skill::where('is_active', true)->orderBy('sort_order')->get(),
-            'products'     => Product::where('status', 'published')->where('is_featured', true)->orderBy('sort_order')->take(5)->get(),
+            'products'     => Product::where('status', 'published')->where('is_featured', true)->orderBy('sort_order')->orderByDesc('id')->take(12)->get(),
             'services'     => Service::where('is_active', true)->orderBy('sort_order')->get(),
-            'testimonials' => Testimonial::where('is_featured', true)->orderBy('sort_order')->get(),
+            'testimonials' => $testimonials,
             'settings'     => $this->settings(),
         ]);
     }
@@ -59,7 +64,14 @@ class PublicController extends Controller
     public function portfolio(): Response
     {
         return Inertia::render('Public/Portfolio', [
-            'projects' => Project::where('status', 'published')->orderBy('sort_order')->get(),
+            'projects' => Project::where('status', 'published')->orderBy('sort_order')->orderByDesc('id')->get(),
+            'categories' => Project::where('status', 'published')
+                ->whereNotNull('category')
+                ->where('category', '!=', '')
+                ->distinct()
+                ->orderBy('category')
+                ->pluck('category')
+                ->toArray(),
             'settings' => $this->settings(),
         ]);
     }

@@ -1,13 +1,28 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import ResourceTable from '@/Components/Admin/ResourceTable';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { FolderKanban, Plus, ExternalLink, Image as ImageIcon, Eye, Trash2, Edit } from 'lucide-react';
+import { Plus, ExternalLink, Image as ImageIcon, Trash2, Edit, Search, CheckCircle2 } from 'lucide-react';
 
-const PORTFOLIO_ROOMS = ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Office', 'Dining', 'Commercial', 'Outdoor'];
+export default function ProjectsIndex({ projects = {}, categories = [], filters = {} }) {
+    const [search, setSearch] = useState(filters.search || '');
+    const currentCategory = filters.category || '';
 
-export default function ProjectsIndex({ projects = {}, filters = {} }) {
-    const [selectedCategory, setSelectedCategory] = useState('');
+    const handleSearch = (e) => {
+        e.preventDefault();
+        router.get(
+            '/admin/projects',
+            { search: search || undefined, category: currentCategory || undefined },
+            { preserveState: true, replace: true }
+        );
+    };
+
+    const handleCategoryFilter = (cat) => {
+        router.get(
+            '/admin/projects',
+            { search: search || undefined, category: cat || undefined },
+            { preserveState: true, replace: true }
+        );
+    };
 
     const handleDelete = (id, title) => {
         if (confirm(`Are you sure you want to delete portfolio project "${title}"?`)) {
@@ -16,6 +31,8 @@ export default function ProjectsIndex({ projects = {}, filters = {} }) {
             });
         }
     };
+
+    const projectList = projects?.data || [];
 
     return (
         <AdminLayout title="Portfolio Projects">
@@ -36,7 +53,7 @@ export default function ProjectsIndex({ projects = {}, filters = {} }) {
                             Portfolio Projects
                         </h1>
                         <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                            Create, edit, and curate architectural interior spaces shown on the public Portfolio page.
+                            Create, edit, and curate architectural interior spaces shown dynamically on the public Portfolio page.
                         </p>
                     </div>
 
@@ -61,6 +78,50 @@ export default function ProjectsIndex({ projects = {}, filters = {} }) {
                     </div>
                 </div>
 
+                {/* Filters & Search Bar */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-100 shadow-2xs">
+                    {/* Category Filter Pills */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+                        <button
+                            type="button"
+                            onClick={() => handleCategoryFilter('')}
+                            className={`rounded-xl px-3 py-1.5 text-xs font-medium transition ${
+                                !currentCategory
+                                    ? 'bg-violet-600 text-white shadow-2xs'
+                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                        >
+                            All Spaces
+                        </button>
+                        {categories.map((cat) => (
+                            <button
+                                key={cat}
+                                type="button"
+                                onClick={() => handleCategoryFilter(cat)}
+                                className={`rounded-xl px-3 py-1.5 text-xs font-medium whitespace-nowrap transition ${
+                                    currentCategory === cat
+                                        ? 'bg-violet-600 text-white shadow-2xs'
+                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                }`}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Search Form */}
+                    <form onSubmit={handleSearch} className="relative sm:w-64 shrink-0">
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search projects..."
+                            className="w-full rounded-xl border border-slate-200 pl-8 pr-3 py-1.5 text-xs focus:border-violet-500 focus:ring-1 focus:ring-violet-500 bg-slate-50/50"
+                        />
+                    </form>
+                </div>
+
                 {/* Projects Table View */}
                 <div className="rounded-2xl bg-white border border-slate-100 shadow-xs overflow-hidden">
                     <div className="overflow-x-auto">
@@ -75,8 +136,8 @@ export default function ProjectsIndex({ projects = {}, filters = {} }) {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
-                                {projects.data && projects.data.length > 0 ? (
-                                    projects.data.map((proj) => (
+                                {projectList.length > 0 ? (
+                                    projectList.map((proj) => (
                                         <tr key={proj.id} className="hover:bg-slate-50/60 transition-colors">
                                             <td className="py-4 pl-6 pr-4 align-middle">
                                                 <div className="flex items-center gap-3">
@@ -102,17 +163,18 @@ export default function ProjectsIndex({ projects = {}, filters = {} }) {
 
                                             <td className="py-4 px-4 align-middle">
                                                 <span className="inline-flex items-center rounded-lg bg-violet-50 text-violet-700 px-2.5 py-1 text-[11px] font-semibold border border-violet-100">
-                                                    {proj.technologies?.[0] || 'Interior Design'}
+                                                    {proj.category || 'General Space'}
                                                 </span>
                                             </td>
 
                                             <td className="py-4 px-4 align-middle whitespace-nowrap">
-                                                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                                                <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
                                                     proj.status === 'published'
                                                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                                         : 'bg-slate-100 text-slate-600'
                                                 }`}>
-                                                    {proj.status}
+                                                    {proj.status === 'published' && <CheckCircle2 size={11} className="text-emerald-600" />}
+                                                    {proj.status === 'published' ? 'Active / Published' : proj.status}
                                                 </span>
                                             </td>
 
@@ -148,13 +210,38 @@ export default function ProjectsIndex({ projects = {}, filters = {} }) {
                                 ) : (
                                     <tr>
                                         <td colSpan={5} className="py-12 text-center text-slate-400">
-                                            No portfolio projects added yet. Click &ldquo;Add Project&rdquo; to showcase your spatial designs.
+                                            No portfolio projects found. Click &ldquo;Add Project&rdquo; to showcase your spatial designs.
                                         </td>
                                     </tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Pagination */}
+                    {projects.links && projects.links.length > 3 && (
+                        <div className="p-4 border-t border-slate-100 flex items-center justify-between">
+                            <span className="text-xs text-slate-500">
+                                Showing {projects.from || 0} to {projects.to || 0} of {projects.total || 0} projects
+                            </span>
+                            <div className="flex items-center gap-1">
+                                {projects.links.map((link, i) => (
+                                    <Link
+                                        key={i}
+                                        href={link.url || '#'}
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                        className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
+                                            link.active
+                                                ? 'bg-violet-600 text-white'
+                                                : link.url
+                                                ? 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                                                : 'text-slate-300 pointer-events-none'
+                                        }`}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </AdminLayout>

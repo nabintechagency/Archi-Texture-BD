@@ -76,6 +76,7 @@ class ContentController extends ApiController
         $resources = [
             'projects' => ['model' => Project::class, 'with' => ['skills'], 'order_by' => 'sort_order', 'rules' => [
                 'title' => ['required', 'string', 'max:255'], 'slug' => ['required', 'string', 'max:255', 'unique:projects,slug'],
+                'category' => ['nullable', 'string', 'max:255'],
                 'summary' => ['nullable', 'string', 'max:255'], 'description' => ['nullable', 'string'], 'featured_image' => ['nullable', 'string', 'max:255'],
                 'project_url' => ['nullable', 'url', 'max:255'], 'repository_url' => ['nullable', 'url', 'max:255'], 'technologies' => ['nullable', 'array'],
                 'status' => ['required', Rule::in(['draft', 'published', 'archived'])], 'is_featured' => ['boolean'], 'completed_at' => ['nullable', 'date'],

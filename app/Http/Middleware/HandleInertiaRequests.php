@@ -34,6 +34,20 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'settings' => \App\Models\Setting::all()->keyBy('key')->map(fn ($s) => $s->value)->toArray(),
+            'sharedProductCategories' => \App\Models\Product::whereNotNull('category')
+                ->where('category', '!=', '')
+                ->distinct()
+                ->orderBy('category')
+                ->pluck('category')
+                ->toArray(),
+            'sharedPortfolioCategories' => \App\Models\Project::where('status', 'published')
+                ->whereNotNull('category')
+                ->where('category', '!=', '')
+                ->distinct()
+                ->orderBy('category')
+                ->pluck('category')
+                ->toArray(),
         ];
     }
 }

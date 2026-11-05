@@ -5,7 +5,7 @@ import FormLayout, {
 } from '@/Components/Admin/FormLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState, useRef } from 'react';
-import { Wand2, Plus, Trash2, Image, Layers, Package, DollarSign, Tag, ArrowLeft, Upload, Check, Percent } from 'lucide-react';
+import { Wand2, Plus, Trash2, Image, Layers, Package, DollarSign, Tag, ArrowLeft, Upload, Check, Percent, Star } from 'lucide-react';
 
 function slugify(str) {
     return str
@@ -17,10 +17,8 @@ function slugify(str) {
 const COMMON_CATEGORIES = [
     'Furniture',
     'Lighting',
-    'Textiles',
     'Decor',
     'Architectural Hardware',
-    'Textiles & Rugs',
     'Sculptural Decor',
     'Acoustic Paneling',
     'Outdoor & Patio',
@@ -197,7 +195,8 @@ export default function ProductForm({ product, categories = [] }) {
         }
     };
 
-    const mergedCategories = Array.from(new Set([...COMMON_CATEGORIES, ...categories]));
+    const mergedCategories = Array.from(new Set([...COMMON_CATEGORIES, ...categories]))
+        .filter(c => c && !c.toLowerCase().includes('textile'));
 
     return (
         <AdminLayout title={isEdit ? 'Edit Piece' : 'Add New Product'}>
@@ -577,19 +576,42 @@ export default function ProductForm({ product, categories = [] }) {
                             </div>
                         </div>
 
-                        <div className="pt-2">
-                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                                Catalog Status
-                            </label>
-                            <select
-                                value={form.status}
-                                onChange={(e) => set('status', e.target.value)}
-                                className="w-full sm:w-64 rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 font-semibold focus:bg-white focus:border-violet-500 focus:outline-none"
-                            >
-                                <option value="published">Published</option>
-                                <option value="draft">Draft</option>
-                                <option value="archived">Archived</option>
-                            </select>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                                    Catalog Status
+                                </label>
+                                <select
+                                    value={form.status}
+                                    onChange={(e) => set('status', e.target.value)}
+                                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 font-semibold focus:bg-white focus:border-violet-500 focus:outline-none"
+                                >
+                                    <option value="published">Published</option>
+                                    <option value="draft">Draft</option>
+                                    <option value="archived">Archived</option>
+                                </select>
+                            </div>
+
+                            <div className="flex items-center justify-between p-3.5 rounded-xl bg-amber-50/70 border border-amber-200">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="h-8 w-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                                        <Star size={16} className={form.is_featured ? "fill-amber-600 text-amber-600" : "text-amber-600"} />
+                                    </div>
+                                    <div>
+                                        <span className="block font-bold text-slate-900 text-xs">Signature Collection</span>
+                                        <span className="text-[11px] text-slate-500">Feature on Homepage Signature Collection</span>
+                                    </div>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={form.is_featured}
+                                        onChange={(e) => set('is_featured', e.target.checked)}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+                                </label>
+                            </div>
                         </div>
                     </div>
 

@@ -1,5 +1,5 @@
 import PublicLayout from '@/Layouts/PublicLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { useState, useMemo, useEffect } from 'react';
 import {
     Sparkles,
@@ -1154,6 +1154,9 @@ function ProductModal({ product, onClose, cartItem, addToCart, updateQuantity, i
 /* Main Products Page Component                       */
 /* -------------------------------------------------- */
 export default function Products({ products = [], settings = {} }) {
+    const { props } = usePage();
+    const sharedCategories = props?.sharedProductCategories || [];
+
     const [selectedCategory, setSelectedCategory] = useState(() => {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
@@ -1169,11 +1172,14 @@ export default function Products({ products = [], settings = {} }) {
     const [toast, setToast] = useState(null);
 
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const cat = params.get('category');
-        if (cat) {
-            setSelectedCategory(cat);
-        }
+        const syncCategoryFromUrl = () => {
+            const params = new URLSearchParams(window.location.search);
+            const cat = params.get('category');
+            setSelectedCategory(cat || 'All');
+        };
+        syncCategoryFromUrl();
+        window.addEventListener('popstate', syncCategoryFromUrl);
+        return () => window.removeEventListener('popstate', syncCategoryFromUrl);
     }, []);
 
     // Cart State (Persisted in localStorage)
@@ -1288,14 +1294,23 @@ export default function Products({ products = [], settings = {} }) {
 
     const totalCartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-    // Derive unique categories
+    // Derive unique categories dynamically including all newly created categories
     const categories = useMemo(() => {
         const set = new Set();
+        // Add all categories present in products
         products.forEach((p) => {
-            if (p.category) set.add(p.category);
+            if (p.category && !p.category.toLowerCase().includes('textile')) {
+                set.add(p.category);
+            }
+        });
+        // Add all active shared categories from database
+        sharedCategories.forEach((c) => {
+            if (c && !c.toLowerCase().includes('textile')) {
+                set.add(c);
+            }
         });
         return ['All', ...Array.from(set)];
-    }, [products]);
+    }, [products, sharedCategories]);
 
     // Filter and Sort
     const filteredProducts = useMemo(() => {
@@ -1391,6 +1406,8 @@ export default function Products({ products = [], settings = {} }) {
                                         onClick={() => {
                                             setSelectedCategory(cat);
                                             setOnlyWishlist(false);
+                                            const newUrl = cat === 'All' ? window.location.pathname : `${window.location.pathname}?category=${encodeURIComponent(cat)}`;
+                                            window.history.pushState({}, '', newUrl);
                                         }}
                                         className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] transition-all duration-200 shrink-0 ${
                                             isSelected
