@@ -1,80 +1,162 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import ResourceTable from '@/Components/Admin/ResourceTable';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
+import { FolderKanban, Plus, ExternalLink, Image as ImageIcon, Eye, Trash2, Edit } from 'lucide-react';
 
-const columns = [
-    {
-        key: 'title',
-        label: 'Title',
-        render: (item) => (
-            <div>
-                <p className="font-medium text-white">{item.title}</p>
-                <p className="text-xs text-slate-500">{item.slug}</p>
-            </div>
-        ),
-    },
-    {
-        key: 'status',
-        label: 'Status',
-        render: (item) => (
-            <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                item.status === 'published' ? 'bg-emerald-500/20 text-emerald-400' :
-                item.status === 'draft' ? 'bg-amber-500/20 text-amber-400' :
-                'bg-slate-500/20 text-slate-400'
-            }`}>
-                {item.status}
-            </span>
-        ),
-    },
-    {
-        key: 'is_featured',
-        label: 'Featured',
-        render: (item) => item.is_featured ? (
-            <span className="text-indigo-400 text-xs font-medium">✓ Featured</span>
-        ) : <span className="text-slate-600 text-xs">—</span>,
-    },
-    {
-        key: 'skills',
-        label: 'Skills',
-        render: (item) => (
-            <div className="flex flex-wrap gap-1">
-                {item.skills?.slice(0, 3).map((s) => (
-                    <span key={s.id} className="rounded bg-slate-700 px-1.5 py-0.5 text-xs text-slate-300">{s.name}</span>
-                ))}
-                {item.skills?.length > 3 && <span className="text-xs text-slate-500">+{item.skills.length - 3}</span>}
-            </div>
-        ),
-    },
-    {
-        key: 'sort_order',
-        label: 'Order',
-        render: (item) => <span className="text-slate-400 text-xs">{item.sort_order}</span>,
-    },
-];
+const PORTFOLIO_ROOMS = ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Office', 'Dining', 'Commercial', 'Outdoor'];
 
-export default function ProjectsIndex({ projects, filters }) {
-    const handleDelete = (id) => {
-        router.delete(`/api/projects/${id}`, {
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content },
-            onSuccess: () => router.reload(),
-        });
+export default function ProjectsIndex({ projects = {}, filters = {} }) {
+    const [selectedCategory, setSelectedCategory] = useState('');
+
+    const handleDelete = (id, title) => {
+        if (confirm(`Are you sure you want to delete portfolio project "${title}"?`)) {
+            router.delete(`/admin/projects/${id}`, {
+                preserveScroll: true,
+            });
+        }
     };
 
     return (
-        <AdminLayout title="Projects">
-            <Head title="Admin — Projects" />
-            <ResourceTable
-                title="Projects"
-                createHref="/admin/projects/create"
-                createLabel="Add Project"
-                columns={columns}
-                pagination={projects}
-                onDelete={handleDelete}
-                editHref={(item) => `/admin/projects/${item.id}/edit`}
-                filters={filters}
-                searchPlaceholder="Search projects..."
-                emptyMessage="No projects yet. Add your first project!"
-            />
+        <AdminLayout title="Portfolio Projects">
+            <Head title="Portfolio Projects — Admin" />
+
+            <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1400px] mx-auto">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 pb-5">
+                    <div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-violet-100 text-violet-700">
+                                Atelier Works
+                            </span>
+                            <span className="text-slate-300">•</span>
+                            <span className="text-xs font-medium text-slate-500">Public Portfolio Showcase</span>
+                        </div>
+                        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                            Portfolio Projects
+                        </h1>
+                        <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                            Create, edit, and curate architectural interior spaces shown on the public Portfolio page.
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-2.5">
+                        <a
+                            href="/portfolio"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-700 transition shadow-2xs"
+                        >
+                            <span>View Public Page</span>
+                            <ExternalLink size={13} className="text-slate-400" />
+                        </a>
+
+                        <Link
+                            href="/admin/projects/create"
+                            className="inline-flex items-center gap-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 px-4 py-2 text-xs font-bold text-white transition-all shadow-sm shadow-violet-500/20"
+                        >
+                            <Plus size={15} strokeWidth={2.5} />
+                            <span>Add Project</span>
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Projects Table View */}
+                <div className="rounded-2xl bg-white border border-slate-100 shadow-xs overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr className="bg-slate-50/70 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                    <th className="py-3.5 pl-6 pr-4">Project Preview</th>
+                                    <th className="py-3.5 px-4">Room / Space</th>
+                                    <th className="py-3.5 px-4">Status</th>
+                                    <th className="py-3.5 px-4">Featured</th>
+                                    <th className="py-3.5 pl-4 pr-6 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {projects.data && projects.data.length > 0 ? (
+                                    projects.data.map((proj) => (
+                                        <tr key={proj.id} className="hover:bg-slate-50/60 transition-colors">
+                                            <td className="py-4 pl-6 pr-4 align-middle">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="relative h-12 w-16 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
+                                                        {proj.featured_image ? (
+                                                            <img
+                                                                src={proj.featured_image}
+                                                                alt={proj.title}
+                                                                className="h-full w-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="h-full w-full flex items-center justify-center text-slate-400">
+                                                                <ImageIcon size={18} />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-bold text-slate-900 block truncate max-w-xs">{proj.title}</span>
+                                                        <span className="text-[11px] text-slate-400 font-mono block mt-0.5">{proj.slug}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+
+                                            <td className="py-4 px-4 align-middle">
+                                                <span className="inline-flex items-center rounded-lg bg-violet-50 text-violet-700 px-2.5 py-1 text-[11px] font-semibold border border-violet-100">
+                                                    {proj.technologies?.[0] || 'Interior Design'}
+                                                </span>
+                                            </td>
+
+                                            <td className="py-4 px-4 align-middle whitespace-nowrap">
+                                                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                                                    proj.status === 'published'
+                                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                                        : 'bg-slate-100 text-slate-600'
+                                                }`}>
+                                                    {proj.status}
+                                                </span>
+                                            </td>
+
+                                            <td className="py-4 px-4 align-middle whitespace-nowrap">
+                                                {proj.is_featured ? (
+                                                    <span className="text-violet-600 font-bold text-xs">★ Featured</span>
+                                                ) : (
+                                                    <span className="text-slate-400 text-xs">—</span>
+                                                )}
+                                            </td>
+
+                                            <td className="py-4 pl-4 pr-6 align-middle text-right whitespace-nowrap">
+                                                <div className="inline-flex items-center gap-1.5">
+                                                    <Link
+                                                        href={`/admin/projects/${proj.id}/edit`}
+                                                        className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-600 hover:text-violet-600 hover:bg-slate-50 transition shadow-2xs"
+                                                        title="Edit Project"
+                                                    >
+                                                        <Edit size={14} />
+                                                    </Link>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDelete(proj.id, proj.title)}
+                                                        className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 transition shadow-2xs"
+                                                        title="Delete Project"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={5} className="py-12 text-center text-slate-400">
+                                            No portfolio projects added yet. Click &ldquo;Add Project&rdquo; to showcase your spatial designs.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </AdminLayout>
     );
 }

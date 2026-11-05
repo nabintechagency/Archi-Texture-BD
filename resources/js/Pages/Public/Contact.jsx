@@ -28,9 +28,9 @@ const FAQS = [
 
 
 export default function Contact({ settings = {} }) {
-    const phone = settings.phone || settings.contact_phone || '01626778573';
-    const email = settings.email || settings.contact_email || 'contact@architexture.com';
-    const location = settings.location || settings.address || 'Mohakhali, Dhaka, Bangladesh';
+    const phone = settings.contact_phone || settings.phone || '01626778573';
+    const email = settings.contact_email || settings.email || 'contact@architexture.com';
+    const location = settings.contact_address || settings.location || settings.address || 'Mohakhali, Dhaka, Bangladesh';
 
     const [copiedField, setCopiedField] = useState(null);
     const [isSubmitted, setIsSubmitted] = useState(false);

@@ -5,12 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['name', 'slug', 'summary', 'description', 'featured_image', 'gallery', 'price', 'category', 'sku', 'stock_quantity', 'status', 'is_featured', 'sort_order'])]
+#[Fillable(['name', 'slug', 'summary', 'description', 'featured_image', 'gallery', 'price', 'original_price', 'discount_percent', 'category', 'sku', 'stock_quantity', 'status', 'is_featured', 'sort_order'])]
 class Product extends Model
 {
     protected function casts(): array
     {
-        return ['gallery' => 'array', 'is_featured' => 'boolean', 'price' => 'decimal:2', 'stock_quantity' => 'integer'];
+        return [
+            'gallery' => 'array',
+            'is_featured' => 'boolean',
+            'price' => 'decimal:2',
+            'original_price' => 'decimal:2',
+            'discount_percent' => 'integer',
+            'stock_quantity' => 'integer',
+        ];
     }
     public function orderItems(): \Illuminate\Database\Eloquent\Relations\HasMany
     {

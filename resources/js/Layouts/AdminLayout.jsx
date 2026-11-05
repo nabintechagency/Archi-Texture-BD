@@ -28,19 +28,15 @@ import {
 } from 'lucide-react';
 
 const navItems = [
-    { label: 'Dashboard',        href: '/admin',                icon: LayoutDashboard, end: true },
-    { label: 'Orders',           href: '/admin/orders',         icon: ShoppingBag, badge: 4 },
-    { label: 'Products & Stock', href: '/admin/products',       icon: Package },
-    { label: 'Sliders',          href: '/admin/sliders',        icon: SlidersHorizontal },
-    { label: 'Projects',         href: '/admin/projects',       icon: FolderKanban },
-    { label: 'Skills',           href: '/admin/skills',         icon: Zap },
-    { label: 'Services',         href: '/admin/services',       icon: Briefcase },
-    { label: 'Experience',       href: '/admin/experience',     icon: ClipboardList },
-    { label: 'Education',        href: '/admin/education',      icon: GraduationCap },
-    { label: 'Certifications',   href: '/admin/certifications',  icon: Award },
-    { label: 'Testimonials',     href: '/admin/testimonials',    icon: Star },
-    { label: 'Blog',             href: '/admin/blog',            icon: FileText },
-    { label: 'Media',            href: '/admin/media',           icon: Image },
+    { label: 'Dashboard',          href: '/admin',          icon: LayoutDashboard, end: true },
+    { label: 'Products & Catalog', href: '/admin/products', icon: Package },
+    { label: 'Orders',             href: '/admin/orders',   icon: ShoppingBag, badge: 4 },
+    { label: 'Portfolio Projects', href: '/admin/projects', icon: FolderKanban },
+    { label: 'Services',           href: '/admin/services', icon: Briefcase },
+    { label: 'Experience',         href: '/admin/experience', icon: ClipboardList },
+    { label: 'Blog',               href: '/admin/blog',     icon: FileText },
+    { label: 'Media',              href: '/admin/media',    icon: Image },
+    { label: 'Site & Notice Settings', href: '/admin/settings', icon: Settings },
 ];
 
 function NavItem({ item, collapsed, orderCount }) {
@@ -83,6 +79,7 @@ export default function AdminLayout({ children, title }) {
     const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
     const orderCount = stats?.orders ?? 4;
 
@@ -125,7 +122,7 @@ export default function AdminLayout({ children, title }) {
                         </div>
                         <div className="min-w-0 flex-1">
                             <p className="text-xs font-bold text-white truncate leading-tight">{user?.name || 'Archi Texture Admin'}</p>
-                            <p className="text-[11px] text-slate-400 truncate mt-0.5">{user?.email || 'admin@architexture.com'}</p>
+                            <p className="text-[11px] text-slate-400 truncate mt-0.5">{user?.email || 'admin@architexturebd.com'}</p>
                         </div>
                         <Link
                             href="/logout"
@@ -221,10 +218,72 @@ export default function AdminLayout({ children, title }) {
                             <ExternalLink size={12} className="text-slate-400" />
                         </a>
 
-                        {/* User Navy Avatar Circle */}
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0F172A] text-white shadow-xs">
-                            <User size={15} />
+                        {/* Topbar User Profile Menu & Logout */}
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                                className="flex items-center gap-2 rounded-full border border-slate-200/80 bg-white p-1 pr-3 hover:bg-slate-50 transition shadow-2xs select-none"
+                            >
+                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-600 text-white font-bold text-xs shadow-xs">
+                                    {user?.name?.[0]?.toUpperCase() ?? 'A'}
+                                </div>
+                                <span className="text-xs font-bold text-slate-700 hidden sm:inline-block max-w-[120px] truncate">
+                                    {user?.name || 'Admin'}
+                                </span>
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            {userDropdownOpen && (
+                                <>
+                                    <div
+                                        className="fixed inset-0 z-40"
+                                        onClick={() => setUserDropdownOpen(false)}
+                                    />
+                                    <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white border border-slate-200 p-2 shadow-xl z-50 animate-in fade-in zoom-in-95 duration-100">
+                                        <div className="px-3 py-2 border-b border-slate-100">
+                                            <p className="text-xs font-bold text-slate-900 truncate">{user?.name || 'Archi Texture Admin'}</p>
+                                            <p className="text-[11px] text-slate-400 truncate mt-0.5">{user?.email || 'admin@architexturebd.com'}</p>
+                                        </div>
+
+                                        <div className="py-1">
+                                            <Link
+                                                href="/admin/settings"
+                                                onClick={() => setUserDropdownOpen(false)}
+                                                className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-violet-600 rounded-xl transition"
+                                            >
+                                                <Settings size={15} />
+                                                <span>Studio Settings</span>
+                                            </Link>
+                                        </div>
+
+                                        <div className="pt-1 border-t border-slate-100">
+                                            <Link
+                                                href="/logout"
+                                                method="post"
+                                                as="button"
+                                                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition"
+                                            >
+                                                <LogOut size={15} />
+                                                <span>Log Out</span>
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
+
+                        {/* Direct Logout Quick Pill Button */}
+                        <Link
+                            href="/logout"
+                            method="post"
+                            as="button"
+                            className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-red-200/80 bg-red-50/70 hover:bg-red-100/80 px-3 py-1.5 text-xs font-bold text-red-600 transition shadow-2xs"
+                            title="Log Out of Admin"
+                        >
+                            <LogOut size={13} />
+                            <span>Logout</span>
+                        </Link>
                     </div>
                 </header>
 

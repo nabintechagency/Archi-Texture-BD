@@ -321,8 +321,8 @@ function CartDrawer({ isOpen, onClose, cart = [], updateQuantity, removeFromCart
                                 <span className="text-xs font-semibold uppercase tracking-wider text-charcoal">
                                     Total Payable:
                                 </span>
-                                <span className="font-serif-display text-xl font-bold text-bronze">
-                                    BDT {subtotal.toLocaleString('en-US')}
+                                <span className="font-sans text-xl font-extrabold text-charcoal">
+                                    ৳ {subtotal.toLocaleString('en-US')}
                                 </span>
                             </div>
 
@@ -411,8 +411,8 @@ function CartDrawer({ isOpen, onClose, cart = [], updateQuantity, removeFromCart
                                                 </div>
 
                                                 {/* Item Total */}
-                                                <span className="font-serif-display text-sm font-semibold text-bronze">
-                                                    BDT {((Number(item.price) || 0) * item.quantity).toLocaleString('en-US')}
+                                                <span className="font-sans text-sm font-bold text-charcoal">
+                                                    ৳ {((Number(item.price) || 0) * item.quantity).toLocaleString('en-US')}
                                                 </span>
                                             </div>
                                         </div>
@@ -461,8 +461,8 @@ function CartDrawer({ isOpen, onClose, cart = [], updateQuantity, removeFromCart
                                     <span className="font-serif-display text-base font-semibold text-charcoal">
                                         Total Estimated
                                     </span>
-                                    <span className="font-serif-display text-xl font-bold text-bronze">
-                                        BDT {subtotal.toLocaleString('en-US')}
+                                    <span className="font-sans text-xl font-extrabold text-charcoal">
+                                        ৳ {subtotal.toLocaleString('en-US')}
                                     </span>
                                 </div>
 
@@ -617,13 +617,30 @@ function SmartProductCard({
 
                     <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-sand/70 pt-4">
                         <div>
-                            <span className="text-[10px] uppercase tracking-wider text-charcoal/50 block">Direct Price</span>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] uppercase tracking-wider text-charcoal/50 block">Price</span>
+                                {product.discount_percent > 0 && (
+                                    <span className="rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+                                        -{product.discount_percent}% OFF
+                                    </span>
+                                )}
+                            </div>
                             {product.price ? (
-                                <span className="font-serif-display text-xl font-bold text-bronze">
-                                    BDT {Number(product.price).toLocaleString('en-US')}
-                                </span>
+                                <div className="flex items-baseline gap-2.5 mt-1">
+                                    {product.discount_percent > 0 && product.original_price && (
+                                        <span className="text-sm text-charcoal/40 line-through font-sans font-medium">
+                                            ৳ {Number(product.original_price).toLocaleString('en-US')}
+                                        </span>
+                                    )}
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-xs font-semibold uppercase tracking-wider text-bronze">৳</span>
+                                        <span className="font-sans text-2xl font-extrabold tracking-tight text-charcoal">
+                                            {Number(product.price).toLocaleString('en-US')}
+                                        </span>
+                                    </div>
+                                </div>
                             ) : (
-                                <span className="text-xs text-charcoal/50 italic">Price on request</span>
+                                <span className="text-xs text-charcoal/50 italic mt-1 block">Price on request</span>
                             )}
                         </div>
 
@@ -701,6 +718,11 @@ function SmartProductCard({
                     {product.category && (
                         <span className="rounded-full bg-white/95 backdrop-blur-md px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-charcoal shadow-sm">
                             {product.category}
+                        </span>
+                    )}
+                    {product.discount_percent > 0 && (
+                        <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white shadow-sm">
+                            -{product.discount_percent}% OFF
                         </span>
                     )}
                     {product.is_featured && (
@@ -804,9 +826,19 @@ function SmartProductCard({
                     <div className="flex items-center justify-between mb-3">
                         <span className="text-[11px] uppercase tracking-wider text-charcoal/50">Price</span>
                         {product.price ? (
-                            <span className="font-serif-display text-base sm:text-lg font-bold text-bronze">
-                                BDT {Number(product.price).toLocaleString('en-US', { minimumFractionDigits: 0 })}
-                            </span>
+                            <div className="flex items-baseline gap-2">
+                                {product.discount_percent > 0 && product.original_price && (
+                                    <span className="text-xs text-charcoal/40 line-through font-sans font-medium">
+                                        ৳ {Number(product.original_price).toLocaleString('en-US', { minimumFractionDigits: 0 })}
+                                    </span>
+                                )}
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-xs font-semibold text-bronze">৳</span>
+                                    <span className="font-sans text-lg sm:text-xl font-extrabold tracking-tight text-charcoal">
+                                        {Number(product.price).toLocaleString('en-US', { minimumFractionDigits: 0 })}
+                                    </span>
+                                </div>
+                            </div>
                         ) : (
                             <span className="text-xs text-charcoal/50 italic">Price on request</span>
                         )}
@@ -1000,11 +1032,24 @@ function ProductModal({ product, onClose, cartItem, addToCart, updateQuantity, i
                         </h2>
 
                         {product.price ? (
-                            <div className="mt-2.5 flex items-baseline gap-2.5">
-                                <span className="font-serif-display text-xl sm:text-2xl text-bronze font-bold">
-                                    BDT {Number(product.price).toLocaleString('en-US', { minimumFractionDigits: 0 })}
-                                </span>
-                                <span className="text-[10px] sm:text-xs text-charcoal/50 uppercase tracking-wider">
+                            <div className="mt-3 flex items-baseline gap-3 flex-wrap">
+                                {product.discount_percent > 0 && product.original_price && (
+                                    <span className="text-base sm:text-lg text-charcoal/40 line-through font-sans font-medium">
+                                        ৳ {Number(product.original_price).toLocaleString('en-US', { minimumFractionDigits: 0 })}
+                                    </span>
+                                )}
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-sm sm:text-base font-bold text-bronze">৳</span>
+                                    <span className="font-sans text-2xl sm:text-3xl font-extrabold tracking-tight text-charcoal">
+                                        {Number(product.price).toLocaleString('en-US', { minimumFractionDigits: 0 })}
+                                    </span>
+                                </div>
+                                {product.discount_percent > 0 && (
+                                    <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold text-white uppercase tracking-wider shadow-xs">
+                                        Save {product.discount_percent}%
+                                    </span>
+                                )}
+                                <span className="text-[10px] sm:text-xs text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
                                     In Stock
                                 </span>
                             </div>

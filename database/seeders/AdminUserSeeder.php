@@ -11,7 +11,7 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            ['email' => 'admin@architexture.com'],
+            ['email' => 'admin@architexturebd.com'],
             [
                 'name'              => 'Archi Texture Admin',
                 'password'          => Hash::make('admin123'),

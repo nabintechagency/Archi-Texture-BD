@@ -61,8 +61,14 @@ class Order extends Model
     public static function generateOrderNumber(): string
     {
         $datePrefix = date('Ymd');
-        $random = strtoupper(Str::random(4));
         $count = self::whereDate('created_at', today())->count() + 1;
-        return sprintf('ORD-%s-%03d%s', $datePrefix, $count, $random);
+        $orderNumber = sprintf('ORD-%s-%04d', $datePrefix, $count);
+
+        while (self::where('order_number', $orderNumber)->exists()) {
+            $count++;
+            $orderNumber = sprintf('ORD-%s-%04d', $datePrefix, $count);
+        }
+
+        return $orderNumber;
     }
 }

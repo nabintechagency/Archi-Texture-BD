@@ -23,7 +23,7 @@ export default function Login({ status, canResetPassword }) {
 
     const fillAdmin = () => {
         setData({
-            email: 'admin@architexture.com',
+            email: 'admin@architexturebd.com',
             password: 'admin123',
             remember: true,
         });
@@ -44,7 +44,7 @@ export default function Login({ status, canResetPassword }) {
                 <div>
                     <p className="font-bold text-amber-950">Administrator Credentials</p>
                     <p className="text-[11px] text-amber-800 mt-0.5">
-                        <span className="font-mono font-semibold">admin@architexture.com</span> &bull; <span className="font-mono font-semibold">admin123</span>
+                        <span className="font-mono font-semibold">admin@architexturebd.com</span> &bull; <span className="font-mono font-semibold">admin123</span>
                     </p>
                 </div>
                 <button

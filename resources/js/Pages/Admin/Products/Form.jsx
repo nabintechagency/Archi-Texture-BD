@@ -1,18 +1,11 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import FormLayout, {
-    FormCard,
-    FormField,
-    FormInput,
-    FormTextarea,
-    FormSelect,
-    FormToggle,
     ErrorBanner,
     SuccessBanner,
 } from '@/Components/Admin/FormLayout';
-import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
-import { Wand2, Plus, Trash2, Image, Layers, Package, DollarSign } from 'lucide-react';
-import api from '@/lib/api';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState, useRef } from 'react';
+import { Wand2, Plus, Trash2, Image, Layers, Package, DollarSign, Tag, ArrowLeft, Upload, Check, Percent } from 'lucide-react';
 
 function slugify(str) {
     return str
@@ -24,6 +17,8 @@ function slugify(str) {
 const COMMON_CATEGORIES = [
     'Furniture',
     'Lighting',
+    'Textiles',
+    'Decor',
     'Architectural Hardware',
     'Textiles & Rugs',
     'Sculptural Decor',
@@ -46,8 +41,11 @@ export default function ProductForm({ product, categories = [] }) {
         description: product?.description ?? '',
         featured_image: product?.featured_image ?? '',
         gallery: initialGallery,
+        original_price: product?.original_price ?? product?.price ?? '',
+        discount_percent: product?.discount_percent ?? '',
         price: product?.price ?? '',
         category: product?.category ?? 'Furniture',
+        custom_category: '',
         sku: product?.sku ?? '',
         stock_quantity: product?.stock_quantity ?? 10,
         status: product?.status ?? 'published',
@@ -55,28 +53,91 @@ export default function ProductForm({ product, categories = [] }) {
         sort_order: product?.sort_order ?? 0,
     });
 
+    const [featuredFile, setFeaturedFile] = useState(null);
+    const [featuredPreview, setFeaturedPreview] = useState(product?.featured_image || '');
+    const [galleryFiles, setGalleryFiles] = useState([]);
+    const [galleryPreviews, setGalleryPreviews] = useState([]);
     const [newGalleryUrl, setNewGalleryUrl] = useState('');
+
     const [errors, setErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
     const [success, setSuccess] = useState(null);
 
+    const featuredInputRef = useRef(null);
+    const galleryInputRef = useRef(null);
+
     const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
     const handleGenerateSku = () => {
-        const catPrefix = (form.category || 'PRD').substring(0, 3).toUpperCase();
+        const cat = form.category === 'CUSTOM' ? form.custom_category : form.category;
+        const catPrefix = (cat || 'PRD').substring(0, 3).toUpperCase();
         const rand = Math.floor(1000 + Math.random() * 9000);
         const generated = `AT-${catPrefix}-${rand}`;
         set('sku', generated);
     };
 
-    const handleAddGalleryImage = () => {
+    const handleOriginalPriceChange = (val) => {
+        const orig = parseFloat(val);
+        const disc = parseFloat(form.discount_percent);
+        let selling = val;
+        if (!isNaN(orig) && orig > 0) {
+            if (!isNaN(disc) && disc > 0) {
+                selling = Math.max(0, orig - (orig * (disc / 100))).toFixed(2);
+            }
+        }
+        setForm((prev) => ({
+            ...prev,
+            original_price: val,
+            price: selling || val,
+        }));
+    };
+
+    const handleDiscountPercentChange = (val) => {
+        const orig = parseFloat(form.original_price || form.price);
+        const disc = parseFloat(val);
+        let selling = form.original_price || form.price;
+        if (!isNaN(orig) && orig > 0) {
+            if (!isNaN(disc) && disc > 0) {
+                selling = Math.max(0, orig - (orig * (disc / 100))).toFixed(2);
+            }
+        }
+        setForm((prev) => ({
+            ...prev,
+            discount_percent: val,
+            price: selling || prev.original_price || prev.price,
+        }));
+    };
+
+    const handleFeaturedFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setFeaturedFile(file);
+            setFeaturedPreview(URL.createObjectURL(file));
+        }
+    };
+
+    const handleGalleryFilesChange = (e) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length > 0) {
+            setGalleryFiles(prev => [...prev, ...files]);
+            const newPreviews = files.map(f => URL.createObjectURL(f));
+            setGalleryPreviews(prev => [...prev, ...newPreviews]);
+        }
+    };
+
+    const handleAddGalleryUrl = () => {
         if (!newGalleryUrl.trim()) return;
         set('gallery', [...form.gallery, newGalleryUrl.trim()]);
         setNewGalleryUrl('');
     };
 
-    const handleRemoveGalleryImage = (idx) => {
+    const handleRemoveExistingGalleryImage = (idx) => {
         set('gallery', form.gallery.filter((_, i) => i !== idx));
+    };
+
+    const handleRemoveNewGalleryFile = (idx) => {
+        setGalleryFiles(prev => prev.filter((_, i) => i !== idx));
+        setGalleryPreviews(prev => prev.filter((_, i) => i !== idx));
     };
 
     const handleSubmit = async (e) => {
@@ -84,21 +145,51 @@ export default function ProductForm({ product, categories = [] }) {
         setSubmitting(true);
         setErrors({});
 
-        const payload = {
-            ...form,
-            sort_order: Number(form.sort_order),
-            stock_quantity: Number(form.stock_quantity),
-            price: form.price ? Number(form.price) : null,
-        };
+        const effectiveCategory = form.category === 'CUSTOM'
+            ? form.custom_category.trim()
+            : form.category;
+
+        const formData = new FormData();
+        formData.append('name', form.name);
+        formData.append('slug', form.slug);
+        formData.append('category', effectiveCategory);
+        if (form.summary) formData.append('summary', form.summary);
+        if (form.description) formData.append('description', form.description);
+
+        const finalPrice = form.price || form.original_price;
+        if (finalPrice) formData.append('price', finalPrice);
+        if (form.original_price) formData.append('original_price', form.original_price);
+        if (form.discount_percent) formData.append('discount_percent', form.discount_percent);
+
+        formData.append('stock_quantity', Number(form.stock_quantity || 0));
+        if (form.sku) formData.append('sku', form.sku);
+        formData.append('status', form.status);
+        formData.append('sort_order', Number(form.sort_order || 0));
+        formData.append('is_featured', form.is_featured ? '1' : '0');
+
+        if (form.featured_image) formData.append('featured_image', form.featured_image);
+
+        if (featuredFile) {
+            formData.append('image_file', featuredFile);
+        }
+
+        form.gallery.forEach((url, i) => {
+            formData.append(`gallery[${i}]`, url);
+        });
+
+        galleryFiles.forEach((file, i) => {
+            formData.append(`gallery_files[${i}]`, file);
+        });
 
         if (isEdit) {
-            router.put(`/admin/products/${product.id}`, payload, {
+            formData.append('_method', 'PUT');
+            router.post(`/admin/products/${product.id}`, formData, {
                 onError: (err) => setErrors(err),
                 onSuccess: () => setSuccess('Product updated successfully!'),
                 onFinish: () => setSubmitting(false),
             });
         } else {
-            router.post('/admin/products', payload, {
+            router.post('/admin/products', formData, {
                 onError: (err) => setErrors(err),
                 onSuccess: () => setSuccess('Product created successfully!'),
                 onFinish: () => setSubmitting(false),
@@ -109,242 +200,417 @@ export default function ProductForm({ product, categories = [] }) {
     const mergedCategories = Array.from(new Set([...COMMON_CATEGORIES, ...categories]));
 
     return (
-        <AdminLayout title={isEdit ? 'Edit Product' : 'Add New Product'}>
-            <Head title={isEdit ? `Edit: ${product.name}` : 'New Product'} />
+        <AdminLayout title={isEdit ? 'Edit Piece' : 'Add New Product'}>
+            <Head title={isEdit ? `Edit: ${product.name}` : 'New Piece — Products & Catalog'} />
 
-            <FormLayout
-                title={isEdit ? `Edit Piece: ${product.name}` : 'Add New Inventory Piece'}
-                backHref="/admin/products"
-                onSubmit={handleSubmit}
-                isSubmitting={submitting}
-            >
+            <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-slate-200/60 pb-4">
+                    <div className="flex items-center gap-3">
+                        <Link
+                            href="/admin/products"
+                            className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition shadow-2xs"
+                        >
+                            <ArrowLeft size={16} />
+                        </Link>
+                        <div>
+                            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                                {isEdit ? `Edit Piece: ${product.name}` : 'Add New Architectural Catalog Piece'}
+                            </h1>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                                Set specifications, discount pricing, direct photography upload, and categorization.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <ErrorBanner errors={errors} />
                 <SuccessBanner message={success} />
 
-                {/* Primary Information */}
-                <FormCard title="Product Overview">
-                    <FormField label="Product Name" required error={errors.name?.[0]}>
-                        <FormInput
-                            value={form.name}
-                            onChange={(e) => {
-                                set('name', e.target.value);
-                                if (!isEdit) set('slug', slugify(e.target.value));
-                            }}
-                            placeholder="e.g. Sculptural Travertine Coffee Table"
-                            error={errors.name?.[0]}
-                        />
-                    </FormField>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* 1. Direct Photo Upload Section */}
+                    <div className="rounded-2xl bg-white border border-slate-200/80 p-6 shadow-xs space-y-4">
+                        <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+                            <Upload size={16} className="text-violet-600" />
+                            <h2 className="text-sm font-bold text-slate-900">Direct Product Photo Upload</h2>
+                        </div>
 
-                    <FormField label="URL Slug" required error={errors.slug?.[0]}>
-                        <FormInput
-                            value={form.slug}
-                            onChange={(e) => set('slug', e.target.value)}
-                            placeholder="sculptural-travertine-coffee-table"
-                            error={errors.slug?.[0]}
-                        />
-                    </FormField>
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                                Main Featured Photo
+                            </label>
+                            <input
+                                type="file"
+                                ref={featuredInputRef}
+                                accept="image/*"
+                                onChange={handleFeaturedFileChange}
+                                className="hidden"
+                            />
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField label="Category" error={errors.category?.[0]}>
-                            <div className="space-y-2">
-                                <FormSelect
-                                    value={mergedCategories.includes(form.category) ? form.category : 'custom'}
-                                    onChange={(e) => {
-                                        if (e.target.value !== 'custom') {
-                                            set('category', e.target.value);
-                                        }
-                                    }}
-                                    options={[
-                                        ...mergedCategories.map((c) => ({ value: c, label: c })),
-                                        { value: 'custom', label: '+ Custom Category' },
-                                    ]}
-                                />
-                                {(!mergedCategories.includes(form.category) || form.category === '') && (
-                                    <FormInput
-                                        value={form.category}
-                                        onChange={(e) => set('category', e.target.value)}
-                                        placeholder="Type custom category name..."
+                            {featuredPreview ? (
+                                <div className="relative h-56 max-w-md rounded-2xl border border-slate-200 overflow-hidden group bg-slate-50">
+                                    <img
+                                        src={featuredPreview}
+                                        alt="Featured preview"
+                                        className="h-full w-full object-cover"
                                     />
-                                )}
-                            </div>
-                        </FormField>
+                                    <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => featuredInputRef.current?.click()}
+                                            className="px-3.5 py-2 rounded-xl bg-white text-slate-900 font-bold text-xs shadow hover:bg-slate-50 transition"
+                                        >
+                                            Change Photo
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setFeaturedFile(null);
+                                                setFeaturedPreview('');
+                                                set('featured_image', '');
+                                            }}
+                                            className="px-3.5 py-2 rounded-xl bg-red-600 text-white font-bold text-xs shadow hover:bg-red-700 transition"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div
+                                    onClick={() => featuredInputRef.current?.click()}
+                                    className="border-2 border-dashed border-slate-300 hover:border-violet-500 rounded-2xl p-8 text-center cursor-pointer transition bg-slate-50/50 hover:bg-violet-50/20 group max-w-md"
+                                >
+                                    <div className="flex flex-col items-center justify-center gap-2">
+                                        <div className="h-12 w-12 rounded-2xl bg-violet-100 text-violet-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                                            <Upload size={22} />
+                                        </div>
+                                        <div>
+                                            <span className="font-bold text-slate-800 text-sm block">
+                                                Click to upload main photo
+                                            </span>
+                                            <span className="text-xs text-slate-400 mt-0.5 block">
+                                                Select from your computer (PNG, JPG, WEBP up to 10MB)
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
-                        <FormField label="SKU / Item Code" error={errors.sku?.[0]}>
-                            <div className="flex gap-2">
-                                <FormInput
-                                    value={form.sku}
-                                    onChange={(e) => set('sku', e.target.value)}
-                                    placeholder="AT-FUR-1049"
-                                    error={errors.sku?.[0]}
+                        {/* Additional Gallery Photo Upload */}
+                        <div className="pt-3 border-t border-slate-100">
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                                Additional Gallery Images (Upload from device or add URL)
+                            </label>
+                            <input
+                                type="file"
+                                multiple
+                                ref={galleryInputRef}
+                                accept="image/*"
+                                onChange={handleGalleryFilesChange}
+                                className="hidden"
+                            />
+
+                            <div className="flex flex-wrap items-center gap-2 mb-3">
+                                <button
+                                    type="button"
+                                    onClick={() => galleryInputRef.current?.click()}
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-violet-200 bg-violet-50 hover:bg-violet-100 text-violet-700 font-semibold text-xs transition"
+                                >
+                                    <Upload size={14} />
+                                    <span>Upload Multiple Photos</span>
+                                </button>
+                                <span className="text-xs text-slate-400">or add via link:</span>
+                                <input
+                                    type="text"
+                                    value={newGalleryUrl}
+                                    onChange={(e) => setNewGalleryUrl(e.target.value)}
+                                    placeholder="Image URL link..."
+                                    className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs text-slate-800 w-64 focus:outline-none focus:border-violet-500"
                                 />
                                 <button
                                     type="button"
-                                    onClick={handleGenerateSku}
-                                    className="shrink-0 rounded-xl bg-slate-800 px-3 py-2 text-xs font-medium text-amber-400 hover:bg-slate-700 transition flex items-center gap-1.5 border border-slate-700"
-                                    title="Auto-generate SKU"
+                                    onClick={handleAddGalleryUrl}
+                                    className="px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition"
                                 >
-                                    <Wand2 size={13} />
-                                    Gen
+                                    Add Link
                                 </button>
                             </div>
-                        </FormField>
+
+                            {(form.gallery.length > 0 || galleryPreviews.length > 0) && (
+                                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 pt-2">
+                                    {form.gallery.map((imgUrl, idx) => (
+                                        <div key={`existing-${idx}`} className="relative group h-24 rounded-xl border border-slate-200 overflow-hidden bg-slate-100">
+                                            <img src={imgUrl} alt={`Gallery ${idx}`} className="h-full w-full object-cover" />
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveExistingGalleryImage(idx)}
+                                                className="absolute top-1 right-1 h-6 w-6 rounded-full bg-red-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow"
+                                                title="Remove"
+                                            >
+                                                &times;
+                                            </button>
+                                        </div>
+                                    ))}
+
+                                    {galleryPreviews.map((previewUrl, idx) => (
+                                        <div key={`new-${idx}`} className="relative group h-24 rounded-xl border-2 border-violet-400 overflow-hidden bg-slate-100">
+                                            <img src={previewUrl} alt={`New upload ${idx}`} className="h-full w-full object-cover" />
+                                            <span className="absolute bottom-1 left-1 bg-violet-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
+                                                New
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveNewGalleryFile(idx)}
+                                                className="absolute top-1 right-1 h-6 w-6 rounded-full bg-red-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow"
+                                                title="Remove"
+                                            >
+                                                &times;
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    <FormField label="Short Summary" error={errors.summary?.[0]}>
-                        <FormInput
-                            value={form.summary}
-                            onChange={(e) => set('summary', e.target.value)}
-                            placeholder="Hand-honed Italian travertine table with fluted cylinder pedestal..."
-                            error={errors.summary?.[0]}
-                        />
-                    </FormField>
-
-                    <FormField label="Full Description & Specifications" error={errors.description?.[0]}>
-                        <FormTextarea
-                            value={form.description}
-                            onChange={(e) => set('description', e.target.value)}
-                            placeholder="Detailed material composition, dimensions (W x D x H), finish, care instructions..."
-                            rows={5}
-                            error={errors.description?.[0]}
-                        />
-                    </FormField>
-                </FormCard>
-
-                {/* Pricing & Stock Management */}
-                <FormCard title="Pricing & Inventory Control">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField label="Price in BDT (৳)" error={errors.price?.[0]}>
-                            <FormInput
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={form.price}
-                                onChange={(e) => set('price', e.target.value)}
-                                placeholder="185000"
-                                error={errors.price?.[0]}
-                            />
-                        </FormField>
-
-                        <FormField label="Initial Stock Quantity" required error={errors.stock_quantity?.[0]}>
-                            <FormInput
-                                type="number"
-                                min="0"
-                                value={form.stock_quantity}
-                                onChange={(e) => set('stock_quantity', e.target.value)}
-                                placeholder="10"
-                                error={errors.stock_quantity?.[0]}
-                            />
-                            <p className="mt-1 text-xs text-slate-500">
-                                {form.stock_quantity <= 0
-                                    ? '⚠️ Marked as Out of Stock'
-                                    : form.stock_quantity <= 5
-                                    ? '⚠️ Marked as Low Stock'
-                                    : '✓ In Stock'}
-                            </p>
-                        </FormField>
-                    </div>
-                </FormCard>
-
-                {/* Imagery & Visuals */}
-                <FormCard title="Media & Photography">
-                    <FormField label="Primary Featured Image URL" error={errors.featured_image?.[0]}>
-                        <FormInput
-                            value={form.featured_image}
-                            onChange={(e) => set('featured_image', e.target.value)}
-                            placeholder="https://images.unsplash.com/... or /storage/products/..."
-                            error={errors.featured_image?.[0]}
-                        />
-                    </FormField>
-
-                    {form.featured_image && (
-                        <div className="mt-2 relative rounded-xl border border-slate-700 overflow-hidden bg-slate-950 max-h-56">
-                            <img
-                                src={form.featured_image}
-                                alt="Preview"
-                                className="w-full h-56 object-cover"
-                            />
-                        </div>
-                    )}
-
-                    {/* Gallery Images */}
-                    <div className="mt-4 pt-4 border-t border-slate-800">
-                        <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                            Additional Gallery Image URLs
-                        </label>
-
-                        <div className="flex gap-2 mb-3">
-                            <FormInput
-                                value={newGalleryUrl}
-                                onChange={(e) => setNewGalleryUrl(e.target.value)}
-                                placeholder="Paste image URL here..."
-                            />
-                            <button
-                                type="button"
-                                onClick={handleAddGalleryImage}
-                                className="shrink-0 rounded-xl bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700 transition border border-slate-700"
-                            >
-                                <Plus size={14} /> Add
-                            </button>
+                    {/* 2. Categorization & Basic Details */}
+                    <div className="rounded-2xl bg-white border border-slate-200/80 p-6 shadow-xs space-y-5">
+                        <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+                            <Tag size={16} className="text-violet-600" />
+                            <h2 className="text-sm font-bold text-slate-900">Categorization & Identifiers</h2>
                         </div>
 
-                        {form.gallery.length > 0 && (
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
-                                {form.gallery.map((imgUrl, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="relative group rounded-xl border border-slate-800 overflow-hidden bg-slate-900 h-24"
-                                    >
-                                        <img src={imgUrl} alt={`Gallery ${idx}`} className="h-full w-full object-cover" />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                                    Product Category <span className="text-red-500">*</span>
+                                </label>
+                                <select
+                                    value={mergedCategories.includes(form.category) ? form.category : 'CUSTOM'}
+                                    onChange={(e) => {
+                                        if (e.target.value === 'CUSTOM') {
+                                            set('category', 'CUSTOM');
+                                        } else {
+                                            set('category', e.target.value);
+                                        }
+                                    }}
+                                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:bg-white focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 transition"
+                                >
+                                    {mergedCategories.map((c) => (
+                                        <option key={c} value={c}>{c}</option>
+                                    ))}
+                                    <option value="CUSTOM">+ Add New Custom Category...</option>
+                                </select>
+                            </div>
+
+                            {form.category === 'CUSTOM' ? (
+                                <div>
+                                    <label className="block text-xs font-semibold text-violet-700 mb-1.5">
+                                        Type New Custom Category <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={form.custom_category}
+                                        onChange={(e) => set('custom_category', e.target.value)}
+                                        placeholder="e.g. Sculptural Stone, Brass Hardware"
+                                        className="w-full rounded-xl border border-violet-300 bg-violet-50/30 px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:border-violet-600 focus:outline-none"
+                                    />
+                                </div>
+                            ) : (
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                                        Item Code / SKU
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={form.sku}
+                                            onChange={(e) => set('sku', e.target.value)}
+                                            placeholder="AT-FUR-2041"
+                                            className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 font-mono focus:bg-white focus:border-violet-500 focus:outline-none"
+                                        />
                                         <button
                                             type="button"
-                                            onClick={() => handleRemoveGalleryImage(idx)}
-                                            className="absolute top-1 right-1 rounded-full bg-red-600/90 p-1 text-white opacity-0 group-hover:opacity-100 transition shadow"
-                                            title="Remove image"
+                                            onClick={handleGenerateSku}
+                                            className="shrink-0 rounded-xl bg-violet-50 border border-violet-200 px-3 py-2 text-xs font-semibold text-violet-700 hover:bg-violet-100 transition flex items-center gap-1.5"
+                                            title="Auto-generate SKU"
                                         >
-                                            <Trash2 size={12} />
+                                            <Wand2 size={13} />
+                                            <span>Generate</span>
                                         </button>
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </FormCard>
+                                </div>
+                            )}
+                        </div>
 
-                {/* Visibility & Settings */}
-                <FormCard title="Visibility & Catalog Settings">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField label="Publishing Status" error={errors.status?.[0]}>
-                            <FormSelect
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                                Product Title / Name <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                required
+                                value={form.name}
+                                onChange={(e) => {
+                                    set('name', e.target.value);
+                                    if (!isEdit) set('slug', slugify(e.target.value));
+                                }}
+                                placeholder="e.g. Sculptural Travertine Coffee Table"
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 font-semibold focus:bg-white focus:border-violet-500 focus:outline-none"
+                            />
+                            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name[0]}</p>}
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                                URL Slug <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                required
+                                value={form.slug}
+                                onChange={(e) => set('slug', e.target.value)}
+                                placeholder="sculptural-travertine-coffee-table"
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 font-mono focus:bg-white focus:border-violet-500 focus:outline-none"
+                            />
+                            {errors.slug && <p className="text-red-500 text-xs mt-1">{errors.slug[0]}</p>}
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                                Brief Architectural Summary
+                            </label>
+                            <input
+                                type="text"
+                                value={form.summary}
+                                onChange={(e) => set('summary', e.target.value)}
+                                placeholder="Hand-honed Italian travertine table with fluted cylinder pedestal..."
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:border-violet-500 focus:outline-none"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                                Full Specifications & Description
+                            </label>
+                            <textarea
+                                rows={4}
+                                value={form.description}
+                                onChange={(e) => set('description', e.target.value)}
+                                placeholder="Material composition, dimensions (W x D x H), finish, care instructions..."
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:border-violet-500 focus:outline-none resize-none"
+                            />
+                        </div>
+                    </div>
+
+                    {/* 3. Pricing & Discount Configuration */}
+                    <div className="rounded-2xl bg-white border border-slate-200/80 p-6 shadow-xs space-y-4">
+                        <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+                            <DollarSign size={16} className="text-emerald-600" />
+                            <h2 className="text-sm font-bold text-slate-900">Pricing, Discounts & Inventory</h2>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                                    Original Price in BDT (৳)
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={form.original_price}
+                                    onChange={(e) => handleOriginalPriceChange(e.target.value)}
+                                    placeholder="185000"
+                                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 font-mono font-bold focus:bg-white focus:border-violet-500 focus:outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                                    Discount % (Optional)
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={form.discount_percent}
+                                        onChange={(e) => handleDiscountPercentChange(e.target.value)}
+                                        placeholder="15"
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-3.5 pr-7 py-2.5 text-xs text-slate-800 font-mono font-bold focus:bg-white focus:border-violet-500 focus:outline-none"
+                                    />
+                                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">%</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-violet-700 mb-1.5">
+                                    Final Selling Price (৳)
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={form.price}
+                                    onChange={(e) => set('price', e.target.value)}
+                                    placeholder="157250"
+                                    className="w-full rounded-xl border border-violet-300 bg-violet-50/40 px-3.5 py-2.5 text-xs text-violet-950 font-mono font-bold focus:bg-white focus:border-violet-500 focus:outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                                    Stock Quantity <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    required
+                                    value={form.stock_quantity}
+                                    onChange={(e) => set('stock_quantity', e.target.value)}
+                                    placeholder="10"
+                                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 font-mono font-bold focus:bg-white focus:border-violet-500 focus:outline-none"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="pt-2">
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                                Catalog Status
+                            </label>
+                            <select
                                 value={form.status}
                                 onChange={(e) => set('status', e.target.value)}
-                                options={[
-                                    { value: 'published', label: 'Published (Visible in Shop)' },
-                                    { value: 'draft', label: 'Draft (Admin Only)' },
-                                    { value: 'archived', label: 'Archived' },
-                                ]}
-                            />
-                        </FormField>
-
-                        <FormField label="Catalog Sort Order">
-                            <FormInput
-                                type="number"
-                                min="0"
-                                value={form.sort_order}
-                                onChange={(e) => set('sort_order', e.target.value)}
-                            />
-                        </FormField>
+                                className="w-full sm:w-64 rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 font-semibold focus:bg-white focus:border-violet-500 focus:outline-none"
+                            >
+                                <option value="published">Published</option>
+                                <option value="draft">Draft</option>
+                                <option value="archived">Archived</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-slate-800">
-                        <FormToggle
-                            label="Feature on Homepage & Shop Header"
-                            description="Highlight this piece in featured curated collections."
-                            checked={form.is_featured}
-                            onChange={(v) => set('is_featured', v)}
-                        />
+                    {/* Actions */}
+                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200/60">
+                        <Link
+                            href="/admin/products"
+                            className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+                        >
+                            Cancel
+                        </Link>
+                        <button
+                            type="submit"
+                            disabled={submitting}
+                            className="rounded-xl bg-violet-600 hover:bg-violet-700 px-6 py-2.5 text-xs font-bold text-white transition shadow-sm shadow-violet-500/20 disabled:opacity-60 flex items-center gap-1.5"
+                        >
+                            {submitting ? 'Saving Piece...' : isEdit ? 'Update Piece' : 'Publish to Catalog'}
+                        </button>
                     </div>
-                </FormCard>
-            </FormLayout>
+                </form>
+            </div>
         </AdminLayout>
     );
 }

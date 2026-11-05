@@ -25,6 +25,18 @@ class AdminController extends Controller
 {
     public function dashboard(): Response
     {
+        // Category breakdown for inventory distribution
+        $categoriesDistribution = Product::selectRaw('category, count(*) as count, sum(COALESCE(price, 0) * COALESCE(stock_quantity, 0)) as total_val')
+            ->groupBy('category')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'category'  => $item->category ?: 'Uncategorized',
+                    'count'     => (int) $item->count,
+                    'total_val' => (float) $item->total_val,
+                ];
+            });
+
         return Inertia::render('Admin/Dashboard', [
             'stats' => [
                 'projects'        => Project::count(),
@@ -42,11 +54,14 @@ class AdminController extends Controller
                 'orders'          => Order::count(),
                 'pending_orders'  => Order::where('status', 'pending')->count(),
                 'revenue'         => (float) Order::where('payment_status', 'paid')->sum('total_amount'),
+                'total_sales'     => (float) Order::sum('total_amount'),
+                'inventory_value' => (float) (Product::selectRaw('SUM(COALESCE(price, 0) * COALESCE(stock_quantity, 0)) as val')->value('val') ?? 0),
                 'messages'        => Message::count(),
                 'unread_messages' => Message::where('is_read', false)->count(),
                 'settings'        => Setting::count(),
             ],
-            'recent_orders' => Order::with('items')->latest('placed_at')->take(5)->get(),
+            'categoriesDistribution' => $categoriesDistribution,
+            'recent_orders' => Order::with('items')->latest('placed_at')->take(6)->get(),
         ]);
     }
 
@@ -290,20 +305,68 @@ class AdminController extends Controller
     public function productStore(Request $request)
     {
         $validated = $request->validate([
-            'name'           => ['required', 'string', 'max:255'],
-            'slug'           => ['required', 'string', 'max:255', 'unique:products,slug'],
-            'summary'        => ['nullable', 'string', 'max:255'],
-            'description'    => ['nullable', 'string'],
-            'featured_image' => ['nullable', 'string', 'max:255'],
-            'gallery'        => ['nullable', 'array'],
-            'price'          => ['nullable', 'numeric', 'min:0'],
-            'category'       => ['nullable', 'string', 'max:255'],
-            'sku'            => ['nullable', 'string', 'max:255'],
-            'stock_quantity' => ['required', 'integer', 'min:0'],
-            'status'         => ['required', 'string', 'in:draft,published,archived'],
-            'is_featured'    => ['boolean'],
-            'sort_order'     => ['integer', 'min:0'],
+            'name'             => ['required', 'string', 'max:255'],
+            'slug'             => ['required', 'string', 'max:255', 'unique:products,slug'],
+            'summary'          => ['nullable', 'string', 'max:255'],
+            'description'      => ['nullable', 'string'],
+            'featured_image'   => ['nullable', 'string'],
+            'image_file'       => ['nullable', 'file', 'image', 'max:10240'],
+            'gallery'          => ['nullable', 'array'],
+            'gallery_files'    => ['nullable', 'array'],
+            'gallery_files.*'  => ['nullable', 'file', 'image', 'max:10240'],
+            'price'            => ['nullable', 'numeric', 'min:0'],
+            'original_price'   => ['nullable', 'numeric', 'min:0'],
+            'discount_percent' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'category'         => ['nullable', 'string', 'max:255'],
+            'sku'              => ['nullable', 'string', 'max:255'],
+            'stock_quantity'   => ['required', 'integer', 'min:0'],
+            'status'           => ['required', 'string', 'in:draft,published,archived'],
+            'is_featured'      => ['boolean'],
+            'sort_order'       => ['integer', 'min:0'],
         ]);
+
+        // Direct upload of featured image file if provided
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('products', $filename, 'public');
+            $validated['featured_image'] = '/storage/' . $path;
+
+            Media::create([
+                'filename'          => $filename,
+                'original_filename' => $file->getClientOriginalName(),
+                'path'              => $path,
+                'disk'              => 'public',
+                'mime_type'         => $file->getMimeType(),
+                'size'              => $file->getSize(),
+                'folder'            => 'products',
+                'uploaded_by'       => $request->user()?->id,
+            ]);
+        }
+
+        // Direct upload of gallery files if provided
+        $gallery = $validated['gallery'] ?? [];
+        if ($request->hasFile('gallery_files')) {
+            foreach ($request->file('gallery_files') as $gFile) {
+                $gFilename = Str::uuid() . '.' . $gFile->getClientOriginalExtension();
+                $gPath = $gFile->storeAs('products', $gFilename, 'public');
+                $gallery[] = '/storage/' . $gPath;
+
+                Media::create([
+                    'filename'          => $gFilename,
+                    'original_filename' => $gFile->getClientOriginalName(),
+                    'path'              => $gPath,
+                    'disk'              => 'public',
+                    'mime_type'         => $gFile->getMimeType(),
+                    'size'              => $gFile->getSize(),
+                    'folder'            => 'products',
+                    'uploaded_by'       => $request->user()?->id,
+                ]);
+            }
+        }
+        $validated['gallery'] = $gallery;
+
+        unset($validated['image_file'], $validated['gallery_files']);
 
         $product = Product::create($validated);
 
@@ -325,20 +388,66 @@ class AdminController extends Controller
     public function productUpdate(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'name'           => ['required', 'string', 'max:255'],
-            'slug'           => ['required', 'string', 'max:255', 'unique:products,slug,' . $product->id],
-            'summary'        => ['nullable', 'string', 'max:255'],
-            'description'    => ['nullable', 'string'],
-            'featured_image' => ['nullable', 'string', 'max:255'],
-            'gallery'        => ['nullable', 'array'],
-            'price'          => ['nullable', 'numeric', 'min:0'],
-            'category'       => ['nullable', 'string', 'max:255'],
-            'sku'            => ['nullable', 'string', 'max:255'],
-            'stock_quantity' => ['required', 'integer', 'min:0'],
-            'status'         => ['required', 'string', 'in:draft,published,archived'],
-            'is_featured'    => ['boolean'],
-            'sort_order'     => ['integer', 'min:0'],
+            'name'             => ['required', 'string', 'max:255'],
+            'slug'             => ['required', 'string', 'max:255', 'unique:products,slug,' . $product->id],
+            'summary'          => ['nullable', 'string', 'max:255'],
+            'description'      => ['nullable', 'string'],
+            'featured_image'   => ['nullable', 'string'],
+            'image_file'       => ['nullable', 'file', 'image', 'max:10240'],
+            'gallery'          => ['nullable', 'array'],
+            'gallery_files'    => ['nullable', 'array'],
+            'gallery_files.*'  => ['nullable', 'file', 'image', 'max:10240'],
+            'price'            => ['nullable', 'numeric', 'min:0'],
+            'original_price'   => ['nullable', 'numeric', 'min:0'],
+            'discount_percent' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'category'         => ['nullable', 'string', 'max:255'],
+            'sku'              => ['nullable', 'string', 'max:255'],
+            'stock_quantity'   => ['required', 'integer', 'min:0'],
+            'status'           => ['required', 'string', 'in:draft,published,archived'],
+            'is_featured'      => ['boolean'],
+            'sort_order'       => ['integer', 'min:0'],
         ]);
+
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('products', $filename, 'public');
+            $validated['featured_image'] = '/storage/' . $path;
+
+            Media::create([
+                'filename'          => $filename,
+                'original_filename' => $file->getClientOriginalName(),
+                'path'              => $path,
+                'disk'              => 'public',
+                'mime_type'         => $file->getMimeType(),
+                'size'              => $file->getSize(),
+                'folder'            => 'products',
+                'uploaded_by'       => $request->user()?->id,
+            ]);
+        }
+
+        $gallery = $validated['gallery'] ?? ($product->gallery ?: []);
+        if ($request->hasFile('gallery_files')) {
+            foreach ($request->file('gallery_files') as $gFile) {
+                $gFilename = Str::uuid() . '.' . $gFile->getClientOriginalExtension();
+                $gPath = $gFile->storeAs('products', $gFilename, 'public');
+                $gallery[] = '/storage/' . $gPath;
+
+                Media::create([
+                    'filename'          => $gFilename,
+                    'original_filename' => $gFile->getClientOriginalName(),
+                    'path'              => $gPath,
+                    'disk'              => 'public',
+                    'mime_type'         => $gFile->getMimeType(),
+                    'size'              => $gFile->getSize(),
+                    'folder'            => 'products',
+                    'uploaded_by'       => $request->user()?->id,
+                ]);
+            }
+        }
+        $validated['gallery'] = $gallery;
+
+        unset($validated['image_file'], $validated['gallery_files']);
 
         $product->update($validated);
 
@@ -400,14 +509,15 @@ class AdminController extends Controller
             'total'       => Order::count(),
             'pending'     => Order::where('status', 'pending')->count(),
             'confirmed'   => Order::where('status', 'confirmed')->count(),
-            'processing'  => Order::whereIn('status', ['confirmed', 'processing', 'shipped'])->count(),
+            'processing'  => Order::where('status', 'processing')->count(),
+            'shipped'     => Order::where('status', 'shipped')->count(),
             'delivered'   => Order::where('status', 'delivered')->count(),
             'cancelled'   => Order::where('status', 'cancelled')->count(),
             'total_sales' => (float) Order::where('payment_status', 'paid')->sum('total_amount'),
         ];
 
         return Inertia::render('Admin/Orders/Index', [
-            'orders'     => $query->latest('placed_at')->paginate(15)->withQueryString(),
+            'orders'     => $query->orderByDesc('id')->paginate(15)->withQueryString(),
             'orderStats' => $orderStats,
             'filters'    => $request->only(['search', 'status', 'payment_status']),
         ]);
@@ -508,7 +618,7 @@ class AdminController extends Controller
 
         $order->update($validated);
 
-        if ($request->wantsJson()) {
+        if ($request->wantsJson() && !$request->header('X-Inertia')) {
             return response()->json(['success' => true, 'order' => $order]);
         }
 
@@ -568,6 +678,34 @@ class AdminController extends Controller
         return Inertia::render('Admin/Settings/Index', [
             'settings' => Setting::orderBy('group')->orderBy('key')->get(),
         ]);
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $data = $request->input('settings', []);
+        
+        // Sync contact_phone and phone so both are always identical
+        if (isset($data['contact_phone'])) {
+            $data['phone'] = $data['contact_phone'];
+        } elseif (isset($data['phone'])) {
+            $data['contact_phone'] = $data['phone'];
+        }
+
+        // Sync contact_email and email
+        if (isset($data['contact_email'])) {
+            $data['email'] = $data['contact_email'];
+        } elseif (isset($data['email'])) {
+            $data['contact_email'] = $data['email'];
+        }
+
+        foreach ($data as $key => $value) {
+            Setting::updateOrCreate(
+                ['key' => $key],
+                ['value' => is_bool($value) ? ($value ? '1' : '0') : $value]
+            );
+        }
+
+        return back()->with('success', 'Settings updated successfully!');
     }
 
     // SEO

@@ -48,7 +48,7 @@ export default function OrderShow({ order }) {
         });
     };
 
-    const formatBdt = (amount) => `BDT ${Number(amount || 0).toLocaleString('en-US')}`;
+    const formatBdt = (amount) => `৳${Number(amount || 0).toLocaleString('en-US')}`;
 
     const printInvoice = () => {
         window.print();
@@ -96,14 +96,16 @@ export default function OrderShow({ order }) {
                                 <h1 className="font-mono text-2xl font-bold text-white print:text-black">
                                     {order.order_number}
                                 </h1>
-                                <span className={`inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-xs font-semibold uppercase tracking-wider ${
+                                <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-extrabold uppercase tracking-wider ${
                                     order.status === 'delivered'
                                         ? 'bg-emerald-500/20 text-emerald-400 print:text-emerald-800'
                                         : order.status === 'cancelled'
                                         ? 'bg-red-500/20 text-red-400 print:text-red-800'
-                                        : 'bg-amber-500/20 text-amber-400 print:text-amber-800'
+                                        : order.status === 'pending'
+                                        ? 'bg-amber-400 text-slate-950 font-black'
+                                        : 'bg-indigo-500/20 text-indigo-400 print:text-indigo-800'
                                 }`}>
-                                    {order.status}
+                                    {order.status === 'pending' ? '⭐ New Order (Pending)' : order.status}
                                 </span>
                             </div>
                             <p className="text-xs text-slate-400 mt-1.5 flex items-center gap-2 print:text-gray-600">

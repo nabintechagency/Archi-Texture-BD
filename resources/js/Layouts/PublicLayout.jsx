@@ -91,9 +91,9 @@ function Wordmark({ settings = {}, light = false, isFooter = false }) {
     );
 }
 
-function TypewriterNotice() {
-    const fullText = "Interior Products Wholesale Showroom & Farm";
-    const bronzeStart = 38; // "Farm" begins at index 38
+function TypewriterNotice({ text = "Interior Products Wholesale Showroom & Farm" }) {
+    const fullText = text || "Interior Products Wholesale Showroom & Farm";
+    const bronzeStart = fullText.includes('&') ? fullText.indexOf('&') : Math.floor(fullText.length * 0.7);
     const [displayText, setDisplayText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -117,7 +117,7 @@ function TypewriterNotice() {
             }, 400);
         }
         return () => clearTimeout(timeout);
-    }, [displayText, isDeleting]);
+    }, [displayText, isDeleting, fullText]);
 
     const prefixPart = displayText.slice(0, Math.min(displayText.length, bronzeStart));
     const bronzePart = displayText.length > bronzeStart ? displayText.slice(bronzeStart) : '';
@@ -158,10 +158,13 @@ export default function PublicLayout({ children, settings = {} }) {
 
     const isHome = url === '/' || url === '' || url.startsWith('/?');
 
+    const noticeText = settings.notice_bar_text;
+    const isNoticeActive = settings.notice_bar_active !== '0' && settings.notice_bar_active !== false;
+
     return (
         <div className="min-h-screen bg-white font-sans text-charcoal antialiased selection:bg-bronze selection:text-white">
             {/* Top Notice Bar */}
-            <TypewriterNotice />
+            {isNoticeActive && <TypewriterNotice text={noticeText} />}
 
             {/* Top Navigation */}
             <header
@@ -403,15 +406,15 @@ export default function PublicLayout({ children, settings = {} }) {
                             <ul className="mt-5 sm:mt-6 space-y-3.5 sm:space-y-4">
                                 <li className="flex items-start gap-3">
                                     <Phone size={15} className="mt-0.5 shrink-0 text-bronze" />
-                                    <a href={`tel:${(settings.phone || settings.contact_phone || '01626778573').replace(/[^0-9+]/g, '')}`} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light break-words">
-                                        {settings.phone || settings.contact_phone || '01626778573'}
+                                    <a href={`tel:${(settings.contact_phone || settings.phone || '01626778573').replace(/[^0-9+]/g, '')}`} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light break-words">
+                                        {settings.contact_phone || settings.phone || '01626778573'}
                                     </a>
                                 </li>
-                                {(settings.email || settings.contact_email || 'contact@architexture.com') && (
+                                {(settings.contact_email || settings.email || 'contact@architexture.com') && (
                                     <li className="flex items-start gap-3">
                                         <Mail size={15} className="mt-0.5 shrink-0 text-bronze" />
-                                        <a href={`mailto:${settings.email || settings.contact_email || 'contact@architexture.com'}`} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light break-all sm:break-words">
-                                            {settings.email || settings.contact_email || 'contact@architexture.com'}
+                                        <a href={`mailto:${settings.contact_email || settings.email || 'contact@architexture.com'}`} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light break-all sm:break-words">
+                                            {settings.contact_email || settings.email || 'contact@architexture.com'}
                                         </a>
                                     </li>
                                 )}
