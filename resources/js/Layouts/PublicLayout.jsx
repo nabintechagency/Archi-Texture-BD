@@ -2,39 +2,75 @@ import { Link, usePage } from '@inertiajs/react';
 import { useState, useEffect, useCallback } from 'react';
 import { Menu, X, Mail, ArrowUp, ChevronDown, Phone, MapPin } from 'lucide-react';
 
-const FacebookIcon = ({ size = 17 }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+const FacebookIcon = ({ size = 20 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="12" fill="#1877F2" />
+        <path
+            d="M15.117 12.637l.45-2.932h-2.814V7.802c0-.806.395-1.592 1.66-1.592h1.284V3.714s-1.165-.199-2.28-.199c-2.327 0-3.849 1.41-3.849 3.963v2.227H6.974v2.932h2.594v7.086c.52.082 1.054.125 1.598.125.545 0 1.079-.043 1.598-.125v-7.086h2.353z"
+            fill="#FFFFFF"
+        />
     </svg>
 );
 
-const InstagramIcon = ({ size = 17 }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+const InstagramIcon = ({ size = 20 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <defs>
+            <radialGradient id="instagram-gradient-footer" cx="30%" cy="107%" r="150%">
+                <stop offset="0%" stopColor="#fdf497" />
+                <stop offset="10%" stopColor="#fdf497" />
+                <stop offset="50%" stopColor="#fd5949" />
+                <stop offset="68%" stopColor="#d6249f" />
+                <stop offset="100%" stopColor="#285AEB" />
+            </radialGradient>
+        </defs>
+        <rect width="24" height="24" rx="6" fill="url(#instagram-gradient-footer)" />
+        <rect x="3.8" y="3.8" width="16.4" height="16.4" rx="4.5" stroke="#FFFFFF" strokeWidth="1.8" fill="none" />
+        <circle cx="12" cy="12" r="4.1" stroke="#FFFFFF" strokeWidth="1.8" fill="none" />
+        <circle cx="16.5" cy="7.5" r="1.15" fill="#FFFFFF" />
     </svg>
 );
 
-const YoutubeIcon = ({ size = 17 }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+const YoutubeIcon = ({ size = 20 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+            d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"
+            fill="#FF0000"
+        />
+        <path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#FFFFFF" />
     </svg>
 );
 
-const LinkedinIcon = ({ size = 17 }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+const LinkedinIcon = ({ size = 20 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect width="24" height="24" rx="4" fill="#0A66C2" />
+        <path
+            d="M5.5 9h3v10h-3v-10zm1.5-4.5c.966 0 1.75.784 1.75 1.75s-.784 1.75-1.75 1.75S5.25 7.216 5.25 6.25 6.034 4.5 7 4.5zm5.5 4.5h2.88v1.37h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.6V19h-3v-4.4c0-1.05-.02-2.4-1.46-2.4-1.46 0-1.68 1.14-1.68 2.32V19h-3V9z"
+            fill="#FFFFFF"
+        />
     </svg>
 );
 
-const PinterestIcon = ({ size = 17 }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M12 0a12 12 0 0 0-4.37 23.18c-.07-.94-.13-2.39.03-3.42.14-.94.94-3.99.94-3.99s-.24-.48-.24-1.19c0-1.12.65-1.95 1.46-1.95.69 0 1.02.52 1.02 1.14 0 .69-.44 1.73-.67 2.69-.19.8.4 1.46 1.19 1.46 1.43 0 2.53-1.51 2.53-3.69 0-1.93-1.39-3.28-3.37-3.28-2.46 0-3.9 1.85-3.9 3.76 0 .74.29 1.54.64 1.97.07.09.08.16.06.25-.07.28-.22.88-.25 1-.04.16-.13.2-.3.12-1.12-.52-1.82-2.15-1.82-3.46 0-2.82 2.05-5.41 5.91-5.41 3.1 0 5.51 2.21 5.51 5.16 0 3.08-1.94 5.56-4.64 5.56-.91 0-1.76-.47-2.05-1.02l-.56 2.13c-.2.78-.75 1.76-1.12 2.36A12 12 0 1 0 12 0z"/>
+const PinterestIcon = ({ size = 20 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="12" fill="#E60023" />
+        <path
+            d="M12 2.5a9.5 9.5 0 0 0-3.46 18.35c-.06-.75-.1-1.9.02-2.72.11-.75.74-3.17.74-3.17s-.19-.38-.19-.95c0-.89.52-1.55 1.16-1.55.55 0 .81.41.81.91 0 .55-.35 1.38-.53 2.14-.15.64.32 1.16.95 1.16 1.14 0 2.02-1.2 2.02-2.94 0-1.54-1.11-2.61-2.68-2.61-1.96 0-3.11 1.47-3.11 2.99 0 .59.23 1.23.51 1.57.06.07.06.13.05.2-.06.22-.18.7-.2.8-.03.13-.1.16-.24.1-1-.41-1.45-1.71-1.45-2.76 0-2.25 1.63-4.31 4.71-4.31 2.47 0 4.39 1.76 4.39 4.11 0 2.45-1.55 4.43-3.7 4.43-.72 0-1.4-.38-1.63-.82l-.44 1.7c-.16.62-.6 1.4-0.89 1.88A9.5 9.5 0 1 0 12 2.5z"
+            fill="#FFFFFF"
+        />
     </svg>
 );
 
-const WhatsappIcon = ({ size = 17 }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+const WhatsappIcon = ({ size = 20 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="12" fill="#25D366" />
+        <path
+            d="M12 4.2a7.8 7.8 0 0 0-6.75 11.7L4.5 19.5l3.85-1A7.8 7.8 0 1 0 12 4.2z"
+            fill="#FFFFFF"
+        />
+        <path
+            d="M15.5 13.6c-.2-.1-1.25-.62-1.45-.7-.2-.07-.34-.1-.48.1-.15.22-.57.7-.7.86-.13.15-.26.17-.46.07-.2-.1-.85-.31-1.62-.99-.6-.54-1-1.2-1.12-1.42-.12-.2 0-.32.09-.42.1-.09.2-.23.3-.35.1-.11.13-.2.2-.33.07-.13.03-.25-.02-.35-.05-.1-.48-1.15-.65-1.57-.17-.42-.35-.36-.48-.37h-.4c-.14 0-.37.05-.56.26-.2.2-.74.72-.74 1.76 0 1.04.76 2.05.86 2.19.1.14 1.5 2.29 3.63 3.21.51.22.9.35 1.21.45.51.16.98.14 1.35.08.41-.06 1.25-.51 1.43-1 .17-.5.17-.93.12-1.02-.05-.1-.2-.15-.42-.26z"
+            fill="#25D366"
+        />
     </svg>
 );
 
@@ -364,29 +400,25 @@ export default function PublicLayout({ children, settings: propSettings = {} }) 
 
             {/* Footer */}
             <footer className="bg-charcoal text-cream">
-                <div className="mx-auto max-w-[1440px] px-4 sm:px-6 md:px-10 py-12 sm:py-16 md:py-20">
+                <div className="mx-auto max-w-[1440px] px-4 sm:px-6 md:px-10 py-10 sm:py-14 md:py-18">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12">
                         {/* Brand Column */}
-                        <div className="space-y-5 sm:space-y-6">
+                        <div className="space-y-4 sm:space-y-5">
                             <Wordmark settings={settings} light isFooter />
-                            
-                            <p className="text-xs sm:text-[13px] leading-relaxed text-cream/65 max-w-sm">
-                                Interior products wholesale showroom and farm, curating bespoke furniture, artisan lighting, and architectural elements.
-                            </p>
 
                             {/* Join Our Community */}
-                            <div className="pt-1">
-                                <h3 className="mb-3 sm:mb-4 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.16em] sm:tracking-[0.2em] text-cream/50">
+                            <div className="pt-1 sm:pt-2">
+                                <h3 className="mb-2.5 sm:mb-3.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.16em] sm:tracking-[0.2em] text-cream/50">
                                     Join Our Community
                                 </h3>
-                                <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
                                     {[
-                                        { key: 'facebook_url', label: 'Facebook', Icon: FacebookIcon, defaultUrl: 'https://facebook.com' },
-                                        { key: 'instagram_url', label: 'Instagram', Icon: InstagramIcon, defaultUrl: 'https://instagram.com' },
-                                        { key: 'youtube_url', label: 'YouTube', Icon: YoutubeIcon, defaultUrl: 'https://youtube.com' },
-                                        { key: 'linkedin_url', label: 'LinkedIn', Icon: LinkedinIcon },
-                                        { key: 'pinterest_url', label: 'Pinterest', Icon: PinterestIcon },
-                                        { key: 'whatsapp_url', label: 'WhatsApp', Icon: WhatsappIcon },
+                                        { key: 'facebook_url', label: 'Facebook', Icon: FacebookIcon, defaultUrl: 'https://facebook.com', brandHover: 'hover:border-[#1877F2]/60 hover:shadow-[0_0_12px_rgba(24,119,242,0.45)]' },
+                                        { key: 'instagram_url', label: 'Instagram', Icon: InstagramIcon, defaultUrl: 'https://instagram.com', brandHover: 'hover:border-[#E1306C]/60 hover:shadow-[0_0_12px_rgba(225,48,108,0.45)]' },
+                                        { key: 'youtube_url', label: 'YouTube', Icon: YoutubeIcon, defaultUrl: 'https://youtube.com', brandHover: 'hover:border-[#FF0000]/60 hover:shadow-[0_0_12px_rgba(255,0,0,0.45)]' },
+                                        { key: 'linkedin_url', label: 'LinkedIn', Icon: LinkedinIcon, brandHover: 'hover:border-[#0A66C2]/60 hover:shadow-[0_0_12px_rgba(10,102,194,0.45)]' },
+                                        { key: 'pinterest_url', label: 'Pinterest', Icon: PinterestIcon, brandHover: 'hover:border-[#E60023]/60 hover:shadow-[0_0_12px_rgba(230,0,35,0.45)]' },
+                                        { key: 'whatsapp_url', label: 'WhatsApp', Icon: WhatsappIcon, brandHover: 'hover:border-[#25D366]/60 hover:shadow-[0_0_12px_rgba(37,211,102,0.45)]' },
                                     ]
                                         .filter(({ key, defaultUrl }) => {
                                             const val = settings[key];
@@ -394,7 +426,7 @@ export default function PublicLayout({ children, settings: propSettings = {} }) 
                                             if (defaultUrl && (val === undefined || val === null)) return true;
                                             return false;
                                         })
-                                        .map(({ key, label, Icon, defaultUrl }) => {
+                                        .map(({ key, label, Icon, defaultUrl, brandHover }) => {
                                             let link = (settings[key] || defaultUrl || '#').trim();
                                             if (key === 'whatsapp_url' && link && !link.startsWith('http')) {
                                                 const digits = link.replace(/[^0-9]/g, '');
@@ -407,78 +439,82 @@ export default function PublicLayout({ children, settings: propSettings = {} }) 
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     aria-label={label}
-                                                    className="rounded-full border border-cream/15 p-2 sm:p-2.5 text-cream/60 transition-all duration-300 hover:border-bronze hover:bg-bronze hover:text-white"
+                                                    className={`inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/5 border border-white/10 transition-all duration-300 hover:scale-110 hover:bg-white/15 ${brandHover}`}
                                                 >
-                                                    <Icon size={16} />
+                                                    <Icon size={20} />
                                                 </a>
                                             );
                                         })}
                                 </div>
                             </div>
                         </div>
-                        {/* Quick Links */}
-                        <div>
-                            <h3 className="font-serif-display mb-4 sm:mb-6 text-base sm:text-lg md:text-xl text-cream tracking-[0.02em]">Quick Links</h3>
-                            <ul className="space-y-2.5 sm:space-y-3">
-                                {[
-                                    { label: 'Home', href: '/' },
-                                    { label: 'Our Products', href: '/products' },
-                                    { label: 'Portfolio', href: '/portfolio' },
-                                    { label: 'About Us', href: '/about' },
-                                    { label: 'Contact', href: '/contact' },
-                                ].map(({ label, href }) => (
-                                    <li key={href}>
-                                        <a href={href} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light inline-block py-0.5">
-                                            {label}
-                                        </a>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
 
-                        {/* Our Products */}
-                        <div>
-                            <h3 className="font-serif-display mb-4 sm:mb-6 text-base sm:text-lg md:text-xl text-cream tracking-[0.02em]">Our Products</h3>
-                            <ul className="space-y-2.5 sm:space-y-3">
-                                <li>
-                                    <a href="/products" className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light inline-block py-0.5">
-                                        All Products
-                                    </a>
-                                </li>
-                                {allProductCategories.map((cat) => (
-                                    <li key={cat}>
-                                        <a href={`/products?category=${encodeURIComponent(cat)}`} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light inline-block py-0.5">
-                                            {cat}
+                        {/* Navigation Columns: side by side on mobile for compact, responsive layout */}
+                        <div className="grid grid-cols-2 gap-6 sm:contents">
+                            {/* Quick Links */}
+                            <div>
+                                <h3 className="font-serif-display mb-3.5 sm:mb-5 text-base sm:text-lg md:text-xl text-cream tracking-[0.02em]">Quick Links</h3>
+                                <ul className="space-y-2 sm:space-y-2.5">
+                                    {[
+                                        { label: 'Home', href: '/' },
+                                        { label: 'Our Products', href: '/products' },
+                                        { label: 'Portfolio', href: '/portfolio' },
+                                        { label: 'About Us', href: '/about' },
+                                        { label: 'Contact', href: '/contact' },
+                                    ].map(({ label, href }) => (
+                                        <li key={href}>
+                                            <a href={href} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light inline-block py-0.5">
+                                                {label}
+                                            </a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            {/* Our Products */}
+                            <div>
+                                <h3 className="font-serif-display mb-3.5 sm:mb-5 text-base sm:text-lg md:text-xl text-cream tracking-[0.02em]">Our Products</h3>
+                                <ul className="space-y-2 sm:space-y-2.5">
+                                    <li>
+                                        <a href="/products" className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light inline-block py-0.5">
+                                            All Products
                                         </a>
                                     </li>
-                                ))}
-                            </ul>
+                                    {allProductCategories.map((cat) => (
+                                        <li key={cat}>
+                                            <a href={`/products?category=${encodeURIComponent(cat)}`} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light inline-block py-0.5">
+                                                {cat}
+                                            </a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                         </div>
 
                         {/* Contact */}
                         <div>
-                            <h3 className="font-serif-display mb-4 sm:mb-6 text-base sm:text-lg md:text-xl text-cream tracking-[0.02em]">Contact</h3>
+                            <h3 className="font-serif-display mb-3.5 sm:mb-5 text-base sm:text-lg md:text-xl text-cream tracking-[0.02em]">Contact</h3>
                             <a
                                 href="/contact"
-                                className="inline-flex w-full sm:w-auto items-center justify-center rounded-[8px] border border-bronze px-6 sm:px-7 py-2.5 text-[11px] sm:text-[12px] font-medium uppercase tracking-[0.14em] sm:tracking-[0.16em] text-bronze-light transition-all duration-300 hover:bg-bronze hover:text-white"
+                                className="inline-flex w-full sm:w-auto items-center justify-center rounded-[8px] border border-bronze px-5 sm:px-6 py-2.5 text-[11px] sm:text-[12px] font-medium uppercase tracking-[0.14em] sm:tracking-[0.16em] text-bronze-light transition-all duration-300 hover:bg-bronze hover:text-white shadow-xs"
                             >
                                 Start Your Project
                             </a>
-                            <ul className="mt-5 sm:mt-6 space-y-3.5 sm:space-y-4">
-                                <li className="flex items-start gap-3">
+                            <ul className="mt-4 sm:mt-5 space-y-3 sm:space-y-3.5">
+                                <li className="flex items-start gap-2.5 sm:gap-3">
                                     <MapPin size={15} className="mt-0.5 shrink-0 text-bronze" />
                                     <span className="text-xs sm:text-[13px] md:text-sm text-cream/65 leading-relaxed">
                                         {settings.contact_address || 'Mohakhali, Dhaka, Bangladesh'}
                                     </span>
                                 </li>
-                                <li className="flex items-start gap-3">
+                                <li className="flex items-start gap-2.5 sm:gap-3">
                                     <Phone size={15} className="mt-0.5 shrink-0 text-bronze" />
                                     <a href={`tel:${(settings.contact_phone || settings.phone || '01626778573').replace(/[^0-9+]/g, '')}`} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light break-words">
                                         {settings.contact_phone || settings.phone || '01626778573'}
                                     </a>
                                 </li>
                                 {(settings.contact_email || settings.email || 'contact@architexturebd.com') && (
-                                    <li className="flex items-start gap-3">
+                                    <li className="flex items-start gap-2.5 sm:gap-3">
                                         <Mail size={15} className="mt-0.5 shrink-0 text-bronze" />
                                         <a href={`mailto:${settings.contact_email || settings.email || 'contact@architexturebd.com'}`} className="text-xs sm:text-[13px] md:text-sm text-cream/65 transition-colors hover:text-bronze-light break-all sm:break-words">
                                             {settings.contact_email || settings.email || 'contact@architexturebd.com'}

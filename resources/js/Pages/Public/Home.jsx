@@ -3,7 +3,7 @@ import { Head, Link } from '@inertiajs/react';
 import { useRef, useState } from 'react';
 import {
     ArrowRight, Users, MessagesSquare, Box, Palette,
-    Star, Check, ChevronRight, MoveHorizontal, Sparkles, Layers,
+    Star, Check, ChevronLeft, ChevronRight, MoveHorizontal, Sparkles, Layers,
 } from 'lucide-react';
 
 const IMG = {
@@ -288,7 +288,7 @@ function FeaturesSection() {
     ];
 
     return (
-        <section className="relative overflow-hidden bg-white py-20 md:py-28 border-t border-sand/60">
+        <section className="relative overflow-hidden bg-white py-20 md:py-28">
             {/* Subtle architectural backdrop dot grid */}
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#A98952_1px,transparent_1px)] [background-size:24px_24px] opacity-10" />
 
@@ -440,6 +440,7 @@ function CompareSlider({ before, after, alt }) {
 /* ---------- Transformations showcase ---------- */
 function TransformationsSection({ projects }) {
     const [active, setActive] = useState(0);
+    const tabsRef = useRef(null);
 
     const items = (projects?.length ? projects.slice(0, 6).map((p, i) => ({
         id: p.id,
@@ -454,6 +455,27 @@ function TransformationsSection({ projects }) {
 
     const current = items[active] || items[0];
 
+    const scrollToTab = (index) => {
+        const container = tabsRef.current;
+        if (!container) return;
+        const tabEl = container.children[index];
+        if (tabEl) {
+            tabEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+    };
+
+    const handlePrev = () => {
+        const prevIdx = (active - 1 + items.length) % items.length;
+        setActive(prevIdx);
+        scrollToTab(prevIdx);
+    };
+
+    const handleNext = () => {
+        const nextIdx = (active + 1) % items.length;
+        setActive(nextIdx);
+        scrollToTab(nextIdx);
+    };
+
     return (
         <section className="bg-[#FAF7F2] py-16 sm:py-20 md:py-24 border-t border-sand/70">
             <div className="mx-auto max-w-[1440px] px-4 sm:px-6 md:px-10">
@@ -467,21 +489,52 @@ function TransformationsSection({ projects }) {
                     </p>
                 </div>
 
-                {/* Responsive Project / Room Tabs */}
-                <div className="mb-6 sm:mb-8 flex items-center justify-start sm:justify-center overflow-x-auto pb-2 sm:pb-0 scrollbar-none gap-2 px-1">
-                    {items.map((item, i) => (
-                        <button
-                            key={item.id}
-                            onClick={() => setActive(i)}
-                            className={`shrink-0 rounded-[8px] px-4 sm:px-5 py-2 text-xs font-medium uppercase tracking-[0.12em] transition-all duration-200 ${
-                                active === i
-                                    ? 'bg-charcoal text-white shadow-md'
-                                    : 'bg-white text-charcoal/70 border border-sand/70 hover:text-charcoal hover:bg-sand/40'
-                            }`}
-                        >
-                            {item.title.length > 30 ? `${item.title.slice(0, 30)}…` : item.title}
-                        </button>
-                    ))}
+                {/* Responsive Project / Room Options Carousel with Left & Right Arrows */}
+                <div className="mb-6 sm:mb-8 mx-auto max-w-4xl flex items-center gap-2 sm:gap-3">
+                    {/* Left Arrow Button */}
+                    <button
+                        type="button"
+                        onClick={handlePrev}
+                        aria-label="Previous transformation option"
+                        className="shrink-0 h-9 w-9 sm:h-10 sm:w-10 rounded-full border border-sand/90 bg-white text-charcoal shadow-sm hover:bg-charcoal hover:text-white hover:border-charcoal hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center cursor-pointer"
+                        title="Previous option"
+                    >
+                        <ChevronLeft size={18} />
+                    </button>
+
+                    {/* Scrollable Options List */}
+                    <div
+                        ref={tabsRef}
+                        className="flex-1 flex items-center justify-start sm:justify-center overflow-x-auto pb-2 sm:pb-0 scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden gap-2 px-1 scroll-smooth"
+                    >
+                        {items.map((item, i) => (
+                            <button
+                                key={item.id}
+                                onClick={() => {
+                                    setActive(i);
+                                    scrollToTab(i);
+                                }}
+                                className={`shrink-0 rounded-[8px] px-4 sm:px-5 py-2 text-xs font-medium uppercase tracking-[0.12em] transition-all duration-200 cursor-pointer ${
+                                    active === i
+                                        ? 'bg-charcoal text-white shadow-md'
+                                        : 'bg-white text-charcoal/70 border border-sand/70 hover:text-charcoal hover:bg-sand/40'
+                                }`}
+                            >
+                                {item.title.length > 30 ? `${item.title.slice(0, 30)}…` : item.title}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Right Arrow Button */}
+                    <button
+                        type="button"
+                        onClick={handleNext}
+                        aria-label="Next transformation option"
+                        className="shrink-0 h-9 w-9 sm:h-10 sm:w-10 rounded-full border border-sand/90 bg-white text-charcoal shadow-sm hover:bg-charcoal hover:text-white hover:border-charcoal hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center cursor-pointer"
+                        title="Next option"
+                    >
+                        <ChevronRight size={18} />
+                    </button>
                 </div>
 
                 {/* Main Interactive Photo Comparison Container */}

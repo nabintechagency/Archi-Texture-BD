@@ -16,7 +16,7 @@ export default function OrderCreate({ products = [] }) {
         notes: '',
         status: 'pending',
         payment_status: 'pending',
-        payment_method: 'cash_on_delivery',
+        payment_method: 'CASH ON DELIVERY',
         shipping_fee: 0,
         discount: 0,
         admin_notes: '',
@@ -377,11 +377,11 @@ export default function OrderCreate({ products = [] }) {
                                     onChange={(e) => setCustomer({ ...customer, payment_method: e.target.value })}
                                     className="w-full rounded-xl border border-slate-700 bg-slate-950 p-2.5 text-xs text-white focus:border-amber-500 focus:outline-none"
                                 >
-                                    <option value="cash_on_delivery">Cash on Delivery (Standard)</option>
-                                    <option value="bkash">bKash Merchant Pay</option>
-                                    <option value="nagad">Nagad</option>
-                                    <option value="bank_transfer">Direct Bank Transfer / Wire</option>
-                                    <option value="card">Credit / Debit Card</option>
+                                    <option value="CASH ON DELIVERY">CASH ON DELIVERY</option>
+                                    <option value="BKASH">BKASH</option>
+                                    <option value="NAGAD">NAGAD</option>
+                                    <option value="UPAY">UPAY</option>
+                                    <option value="BANK TRANSFER">BANK TRANSFER</option>
                                 </select>
                             </div>
 

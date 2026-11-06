@@ -23,7 +23,11 @@ function MessageModal({ message, onClose }) {
                 <div className="flex items-center justify-between p-6 border-b border-slate-700">
                     <div>
                         <h3 className="text-lg font-semibold text-white">{message.subject || 'No Subject'}</h3>
-                        <p className="text-sm text-slate-400 mt-1">From: {message.name} &lt;{message.email}&gt;</p>
+                        <p className="text-sm text-slate-400 mt-1">
+                            From: <span className="text-white font-medium">{message.name}</span>
+                            {message.phone && <span className="ml-2 text-amber-400 font-mono">· {message.phone}</span>}
+                            {message.email && <span className="ml-2 text-slate-400">· &lt;{message.email}&gt;</span>}
+                        </p>
                     </div>
                     <button onClick={onClose} className="text-slate-400 hover:text-white text-sm">Close</button>
                 </div>
@@ -33,12 +37,24 @@ function MessageModal({ message, onClose }) {
                         Received {new Date(message.created_at).toLocaleString()}
                     </p>
                 </div>
-                <div className="flex items-center justify-between p-6 border-t border-slate-700">
-                    <a href={`mailto:${message.email}`} className="inline-flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 transition-colors">
-                        <Mail size={14} /> Reply via Email
-                    </a>
+                <div className="flex flex-wrap items-center justify-between gap-3 p-6 border-t border-slate-700">
+                    <div className="flex items-center gap-2">
+                        {message.phone && (
+                            <a
+                                href={`tel:${message.phone.replace(/[^0-9+]/g, '')}`}
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3.5 py-2 text-xs font-semibold hover:bg-emerald-500/30 transition-colors"
+                            >
+                                Call {message.phone}
+                            </a>
+                        )}
+                        {message.email && (
+                            <a href={`mailto:${message.email}`} className="inline-flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 transition-colors">
+                                <Mail size={14} /> Reply via Email
+                            </a>
+                        )}
+                    </div>
                     {!message.is_read && (
-                        <button onClick={markRead} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-500 transition-colors">
+                        <button onClick={markRead} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-500 transition-colors">
                             <MailOpen size={14} /> Mark as Read
                         </button>
                     )}

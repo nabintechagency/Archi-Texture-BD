@@ -19,9 +19,9 @@ const columns = [
 export default function BlogIndex({ posts, filters }) {
     const handleDelete = (id) => router.delete(`/api/blog-posts/${id}`, { onSuccess: () => router.reload() });
     return (
-        <AdminLayout title="Blog">
-            <Head title="Admin — Blog" />
-            <ResourceTable title="Blog Posts" createHref="/admin/blog/create" createLabel="New Post" columns={columns} pagination={posts} onDelete={handleDelete} editHref={(item) => `/admin/blog/${item.id}/edit`} filters={filters} searchPlaceholder="Search posts..." emptyMessage="No blog posts yet." />
+        <AdminLayout title="Blogs">
+            <Head title="Admin — Blogs" />
+            <ResourceTable title="Blogs" createHref="/admin/blog/create" createLabel="New Post" columns={columns} pagination={posts} onDelete={handleDelete} editHref={(item) => `/admin/blog/${item.id}/edit`} filters={filters} searchPlaceholder="Search posts..." emptyMessage="No blog posts yet." />
         </AdminLayout>
     );
 }

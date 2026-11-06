@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-#[Fillable(['title', 'slug', 'category', 'summary', 'description', 'featured_image', 'project_url', 'repository_url', 'technologies', 'status', 'is_featured', 'completed_at', 'sort_order'])]
+#[Fillable(['title', 'slug', 'category', 'summary', 'description', 'featured_image', 'gallery', 'project_url', 'repository_url', 'technologies', 'status', 'is_featured', 'completed_at', 'sort_order'])]
 class Project extends Model
 {
     public function skills(): BelongsToMany
@@ -16,6 +16,6 @@ class Project extends Model
 
     protected function casts(): array
     {
-        return ['technologies' => 'array', 'is_featured' => 'boolean', 'completed_at' => 'date'];
+        return ['gallery' => 'array', 'technologies' => 'array', 'is_featured' => 'boolean', 'completed_at' => 'date'];
     }
 }

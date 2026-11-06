@@ -203,6 +203,9 @@ class AdminController extends Controller
             'description'    => ['nullable', 'string'],
             'featured_image' => ['nullable', 'string'],
             'image_file'     => ['nullable', 'file', 'image', 'max:10240'],
+            'gallery'        => ['nullable', 'array', 'max:15'],
+            'gallery_files'  => ['nullable', 'array', 'max:15'],
+            'gallery_files.*'=> ['nullable', 'file', 'image', 'max:10240'],
             'project_url'    => ['nullable', 'url', 'max:255'],
             'status'         => ['required', 'string', 'in:draft,published,archived'],
             'is_featured'    => ['boolean'],
@@ -228,7 +231,30 @@ class AdminController extends Controller
             ]);
         }
 
-        unset($validated['image_file']);
+        // Direct upload of gallery files if provided (Limit up to 15)
+        $gallery = $validated['gallery'] ?? [];
+        if ($request->hasFile('gallery_files')) {
+            foreach ($request->file('gallery_files') as $gFile) {
+                if (count($gallery) >= 15) break;
+                $gFilename = Str::uuid() . '.' . $gFile->getClientOriginalExtension();
+                $gPath = $gFile->storeAs('projects', $gFilename, 'public');
+                $gallery[] = '/storage/' . $gPath;
+
+                Media::create([
+                    'filename'          => $gFilename,
+                    'original_filename' => $gFile->getClientOriginalName(),
+                    'path'              => $gPath,
+                    'disk'              => 'public',
+                    'mime_type'         => $gFile->getMimeType(),
+                    'size'              => $gFile->getSize(),
+                    'folder'            => 'projects',
+                    'uploaded_by'       => $request->user()?->id,
+                ]);
+            }
+        }
+        $validated['gallery'] = array_slice($gallery, 0, 15);
+
+        unset($validated['image_file'], $validated['gallery_files']);
 
         $project = Project::create($validated);
 
@@ -268,6 +294,9 @@ class AdminController extends Controller
             'description'    => ['nullable', 'string'],
             'featured_image' => ['nullable', 'string'],
             'image_file'     => ['nullable', 'file', 'image', 'max:10240'],
+            'gallery'        => ['nullable', 'array', 'max:15'],
+            'gallery_files'  => ['nullable', 'array', 'max:15'],
+            'gallery_files.*'=> ['nullable', 'file', 'image', 'max:10240'],
             'project_url'    => ['nullable', 'url', 'max:255'],
             'status'         => ['required', 'string', 'in:draft,published,archived'],
             'is_featured'    => ['boolean'],
@@ -293,7 +322,30 @@ class AdminController extends Controller
             ]);
         }
 
-        unset($validated['image_file']);
+        // Direct upload of gallery files if provided (Limit up to 15)
+        $gallery = $validated['gallery'] ?? ($project->gallery ?: []);
+        if ($request->hasFile('gallery_files')) {
+            foreach ($request->file('gallery_files') as $gFile) {
+                if (count($gallery) >= 15) break;
+                $gFilename = Str::uuid() . '.' . $gFile->getClientOriginalExtension();
+                $gPath = $gFile->storeAs('projects', $gFilename, 'public');
+                $gallery[] = '/storage/' . $gPath;
+
+                Media::create([
+                    'filename'          => $gFilename,
+                    'original_filename' => $gFile->getClientOriginalName(),
+                    'path'              => $gPath,
+                    'disk'              => 'public',
+                    'mime_type'         => $gFile->getMimeType(),
+                    'size'              => $gFile->getSize(),
+                    'folder'            => 'projects',
+                    'uploaded_by'       => $request->user()?->id,
+                ]);
+            }
+        }
+        $validated['gallery'] = array_slice($gallery, 0, 15);
+
+        unset($validated['image_file'], $validated['gallery_files']);
 
         $project->update($validated);
 
@@ -992,6 +1044,7 @@ class AdminController extends Controller
         $validated = $request->validate([
             'status'         => ['sometimes', 'string', 'in:pending,confirmed,processing,shipped,delivered,cancelled'],
             'payment_status' => ['sometimes', 'string', 'in:pending,paid,failed,refunded'],
+            'payment_method' => ['sometimes', 'string'],
             'admin_notes'    => ['sometimes', 'nullable', 'string'],
         ]);
 

@@ -42,19 +42,9 @@ export default function ProjectsIndex({ projects = {}, categories = [], filters 
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 pb-5">
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-violet-100 text-violet-700">
-                                Atelier Works
-                            </span>
-                            <span className="text-slate-300">•</span>
-                            <span className="text-xs font-medium text-slate-500">Public Portfolio Showcase</span>
-                        </div>
                         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                             Portfolio Projects
                         </h1>
-                        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                            Create, edit, and curate architectural interior spaces shown dynamically on the public Portfolio page.
-                        </p>
                     </div>
 
                     <div className="flex items-center gap-2.5">
@@ -85,11 +75,10 @@ export default function ProjectsIndex({ projects = {}, categories = [], filters 
                         <button
                             type="button"
                             onClick={() => handleCategoryFilter('')}
-                            className={`rounded-xl px-3 py-1.5 text-xs font-medium transition ${
-                                !currentCategory
+                            className={`rounded-xl px-3 py-1.5 text-xs font-medium transition ${!currentCategory
                                     ? 'bg-violet-600 text-white shadow-2xs'
                                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                            }`}
+                                }`}
                         >
                             All Spaces
                         </button>
@@ -98,11 +87,10 @@ export default function ProjectsIndex({ projects = {}, categories = [], filters 
                                 key={cat}
                                 type="button"
                                 onClick={() => handleCategoryFilter(cat)}
-                                className={`rounded-xl px-3 py-1.5 text-xs font-medium whitespace-nowrap transition ${
-                                    currentCategory === cat
+                                className={`rounded-xl px-3 py-1.5 text-xs font-medium whitespace-nowrap transition ${currentCategory === cat
                                         ? 'bg-violet-600 text-white shadow-2xs'
                                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                                }`}
+                                    }`}
                             >
                                 {cat}
                             </button>
@@ -168,11 +156,10 @@ export default function ProjectsIndex({ projects = {}, categories = [], filters 
                                             </td>
 
                                             <td className="py-4 px-4 align-middle whitespace-nowrap">
-                                                <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-                                                    proj.status === 'published'
+                                                <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${proj.status === 'published'
                                                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                                         : 'bg-slate-100 text-slate-600'
-                                                }`}>
+                                                    }`}>
                                                     {proj.status === 'published' && <CheckCircle2 size={11} className="text-emerald-600" />}
                                                     {proj.status === 'published' ? 'Active / Published' : proj.status}
                                                 </span>
@@ -230,13 +217,12 @@ export default function ProjectsIndex({ projects = {}, categories = [], filters 
                                         key={i}
                                         href={link.url || '#'}
                                         dangerouslySetInnerHTML={{ __html: link.label }}
-                                        className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
-                                            link.active
+                                        className={`px-3 py-1 rounded-lg text-xs font-medium transition ${link.active
                                                 ? 'bg-violet-600 text-white'
                                                 : link.url
-                                                ? 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-                                                : 'text-slate-300 pointer-events-none'
-                                        }`}
+                                                    ? 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                                                    : 'text-slate-300 pointer-events-none'
+                                            }`}
                                     />
                                 ))}
                             </div>

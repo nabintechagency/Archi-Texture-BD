@@ -18,7 +18,7 @@ router.on('invalid', (event) => {
 });
 
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
+    title: (title) => (title ? `${title} - ${appName}` : ''),
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.jsx`,

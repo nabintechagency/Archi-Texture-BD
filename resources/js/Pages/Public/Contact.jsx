@@ -76,9 +76,6 @@ export default function Contact({ settings = {} }) {
                 {/* 1. Main Integrated Hero & Contact Hub (Warm Cream) */}
                 {/* -------------------------------------------------- */}
                 <section className="relative pt-10 sm:pt-14 md:pt-16 pb-16 sm:pb-20 lg:pb-24 bg-[#FAF7F2] border-b border-sand/70 overflow-hidden">
-                    {/* Architectural dot ambient pattern */}
-                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#A98952_1px,transparent_1px)] [background-size:24px_24px] opacity-10" />
-                    
                     <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         
                         {/* Upper Middle Page Heading */}
@@ -242,39 +239,37 @@ export default function Contact({ settings = {} }) {
                                                     required
                                                     value={data.name}
                                                     onChange={(e) => setData('name', e.target.value)}
-                                                    placeholder="Lutfor Rahaman"
-                                                    className="w-full rounded-[8px] border border-sand bg-[#FAF7F2]/60 px-3.5 py-2.5 sm:py-3 text-sm text-charcoal placeholder:text-charcoal/35 focus:border-bronze focus:bg-white focus:outline-none focus:ring-2 focus:ring-bronze/20 transition"
+                                                    className="w-full rounded-[8px] border border-sand bg-white px-3.5 py-2.5 sm:py-3 text-sm text-charcoal focus:border-bronze focus:bg-white focus:outline-none focus:ring-2 focus:ring-bronze/20 transition"
                                                 />
                                                 {errors?.name && <p className="mt-1 text-xs text-rose-500">{errors.name}</p>}
                                             </div>
 
                                             <div>
                                                 <label className="block text-[11px] sm:text-xs font-semibold uppercase tracking-[0.14em] text-charcoal/80 mb-1.5">
-                                                    Email Address <span className="text-rose-500">*</span>
+                                                    Phone Number <span className="text-rose-500">*</span>
                                                 </label>
                                                 <input
-                                                    type="email"
+                                                    type="tel"
                                                     required
-                                                    value={data.email}
-                                                    onChange={(e) => setData('email', e.target.value)}
-                                                    placeholder="contact@architexture.com"
-                                                    className="w-full rounded-[8px] border border-sand bg-[#FAF7F2]/60 px-3.5 py-2.5 sm:py-3 text-sm text-charcoal placeholder:text-charcoal/35 focus:border-bronze focus:bg-white focus:outline-none focus:ring-2 focus:ring-bronze/20 transition"
+                                                    value={data.phone}
+                                                    onChange={(e) => setData('phone', e.target.value)}
+                                                    className="w-full rounded-[8px] border border-sand bg-white px-3.5 py-2.5 sm:py-3 text-sm text-charcoal focus:border-bronze focus:bg-white focus:outline-none focus:ring-2 focus:ring-bronze/20 transition"
                                                 />
-                                                {errors?.email && <p className="mt-1 text-xs text-rose-500">{errors.email}</p>}
+                                                {errors?.phone && <p className="mt-1 text-xs text-rose-500">{errors.phone}</p>}
                                             </div>
                                         </div>
 
                                         <div>
                                             <label className="block text-[11px] sm:text-xs font-semibold uppercase tracking-[0.14em] text-charcoal/80 mb-1.5">
-                                                Phone Number (Optional)
+                                                Email Address (Optional)
                                             </label>
                                             <input
-                                                type="tel"
-                                                value={data.phone}
-                                                onChange={(e) => setData('phone', e.target.value)}
-                                                placeholder="01626778573"
-                                                className="w-full rounded-[8px] border border-sand bg-[#FAF7F2]/60 px-3.5 py-2.5 sm:py-3 text-sm text-charcoal placeholder:text-charcoal/35 focus:border-bronze focus:bg-white focus:outline-none focus:ring-2 focus:ring-bronze/20 transition"
+                                                type="email"
+                                                value={data.email}
+                                                onChange={(e) => setData('email', e.target.value)}
+                                                className="w-full rounded-[8px] border border-sand bg-white px-3.5 py-2.5 sm:py-3 text-sm text-charcoal focus:border-bronze focus:bg-white focus:outline-none focus:ring-2 focus:ring-bronze/20 transition"
                                             />
+                                            {errors?.email && <p className="mt-1 text-xs text-rose-500">{errors.email}</p>}
                                         </div>
 
                                         <div>
@@ -286,8 +281,7 @@ export default function Contact({ settings = {} }) {
                                                 rows={4}
                                                 value={data.message}
                                                 onChange={(e) => setData('message', e.target.value)}
-                                                placeholder="Describe your space dimensions, current challenges, style preferences, or any questions for our design team..."
-                                                className="w-full rounded-[8px] border border-sand bg-[#FAF7F2]/60 px-3.5 py-2.5 sm:py-3 text-sm text-charcoal placeholder:text-charcoal/35 focus:border-bronze focus:bg-white focus:outline-none focus:ring-2 focus:ring-bronze/20 transition resize-none leading-relaxed"
+                                                className="w-full rounded-[8px] border border-sand bg-white px-3.5 py-2.5 sm:py-3 text-sm text-charcoal focus:border-bronze focus:bg-white focus:outline-none focus:ring-2 focus:ring-bronze/20 transition resize-none leading-relaxed"
                                             />
                                             {errors?.message && <p className="mt-1 text-xs text-rose-500">{errors.message}</p>}
                                         </div>

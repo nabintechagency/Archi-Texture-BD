@@ -133,6 +133,7 @@ export default function Portfolio({ projects = [], categories = [], settings = {
                 src: p.featured_image || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80',
                 title: p.title,
                 subtitle: p.summary || p.description || '',
+                gallery: Array.isArray(p.gallery) ? p.gallery : [],
             }));
         }
         return FALLBACK_GALLERY;
@@ -169,6 +170,7 @@ export default function Portfolio({ projects = [], categories = [], settings = {
 
     const [selectedCat, setSelectedCat] = useState('All Spaces');
     const [activeImageIndex, setActiveImageIndex] = useState(null);
+    const [activeSubIndex, setActiveSubIndex] = useState(0);
 
     // Sync category from URL param if present on load or change
     useEffect(() => {
@@ -196,17 +198,26 @@ export default function Portfolio({ projects = [], categories = [], settings = {
         );
     }, [allItems, selectedCat]);
 
-    const openLightbox = (index) => setActiveImageIndex(index);
-    const closeLightbox = () => setActiveImageIndex(null);
+    const openLightbox = (index) => {
+        setActiveImageIndex(index);
+        setActiveSubIndex(0);
+    };
+
+    const closeLightbox = () => {
+        setActiveImageIndex(null);
+        setActiveSubIndex(0);
+    };
 
     const prevImage = (e) => {
         e?.stopPropagation();
         setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : currentItems.length - 1));
+        setActiveSubIndex(0);
     };
 
     const nextImage = (e) => {
         e?.stopPropagation();
         setActiveImageIndex((prev) => (prev < currentItems.length - 1 ? prev + 1 : 0));
+        setActiveSubIndex(0);
     };
 
     return (
@@ -281,6 +292,14 @@ export default function Portfolio({ projects = [], categories = [], settings = {
                                             className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+                                        {/* Gallery Photo Count Badge */}
+                                        {item.gallery && item.gallery.length > 0 && (
+                                            <div className="absolute left-3 top-3 z-10 flex items-center gap-1 rounded-full bg-charcoal/80 backdrop-blur-xs px-2.5 py-1 text-[10px] font-semibold text-white shadow-xs">
+                                                <Layers size={11} className="text-bronze-light" />
+                                                <span>{item.gallery.length + 1} Photos</span>
+                                            </div>
+                                        )}
 
                                         {/* Zoom Icon Button */}
                                         <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-charcoal opacity-0 shadow-md backdrop-blur-sm transition-all duration-300 group-hover:opacity-100 hover:bg-bronze hover:text-white">
@@ -385,40 +404,76 @@ export default function Portfolio({ projects = [], categories = [], settings = {
                         <ChevronRight size={24} />
                     </button>
 
-                    {/* Image and Caption */}
-                    <div
-                        className="max-h-[90vh] max-w-4xl overflow-hidden rounded-lg bg-charcoal border border-white/10 shadow-2xl"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <img
-                            src={currentItems[activeImageIndex].src}
-                            alt={currentItems[activeImageIndex].title}
-                            className="max-h-[70vh] w-full object-contain bg-black/40"
-                        />
-                        <div className="border-t border-white/10 bg-[#171614] p-6 text-white">
-                            <div className="flex items-center justify-between gap-4">
-                                <div>
-                                    <span className="text-xs font-semibold uppercase tracking-[0.16em] text-bronze-light">
-                                        {currentItems[activeImageIndex].category} · Space 0{activeImageIndex + 1} of 0{currentItems.length}
-                                    </span>
-                                    <h3 className="font-serif-display mt-1 text-xl font-medium sm:text-2xl">
-                                        {currentItems[activeImageIndex].title}
-                                    </h3>
+                    {/* Image and Caption with Multi-Photo Gallery Support */}
+                    {(() => {
+                        const activeItem = currentItems[activeImageIndex];
+                        const allProjectPhotos = [activeItem.src, ...(activeItem.gallery || [])].filter(Boolean);
+                        const currentPhoto = allProjectPhotos[activeSubIndex] || activeItem.src;
+
+                        return (
+                            <div
+                                className="max-h-[92vh] max-w-4xl w-full overflow-hidden rounded-lg bg-charcoal border border-white/10 shadow-2xl flex flex-col"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className="relative flex-1 flex items-center justify-center bg-black/50 overflow-hidden min-h-[320px]">
+                                    <img
+                                        src={currentPhoto}
+                                        alt={activeItem.title}
+                                        className="max-h-[60vh] sm:max-h-[66vh] w-full object-contain"
+                                    />
+                                    {allProjectPhotos.length > 1 && (
+                                        <span className="absolute top-3 right-3 bg-black/70 backdrop-blur-xs text-white text-[11px] font-medium px-2.5 py-1 rounded-full border border-white/20">
+                                            {activeSubIndex + 1} / {allProjectPhotos.length}
+                                        </span>
+                                    )}
                                 </div>
-                                <a
-                                    href="/contact"
-                                    className="hidden sm:inline-flex shrink-0 items-center rounded-full bg-bronze px-6 py-2.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-white hover:bg-bronze-dark transition-colors"
-                                >
-                                    Inquire Look
-                                </a>
+
+                                {/* Thumbnail Strip if multiple photos */}
+                                {allProjectPhotos.length > 1 && (
+                                    <div className="flex items-center gap-2 px-4 py-2.5 bg-[#121210] border-t border-white/10 overflow-x-auto scrollbar-none">
+                                        {allProjectPhotos.map((photo, pIdx) => (
+                                            <button
+                                                key={`thumb-${pIdx}`}
+                                                type="button"
+                                                onClick={() => setActiveSubIndex(pIdx)}
+                                                className={`relative h-12 w-16 shrink-0 rounded overflow-hidden border-2 transition ${
+                                                    activeSubIndex === pIdx
+                                                        ? 'border-bronze scale-105 shadow-sm'
+                                                        : 'border-white/10 opacity-60 hover:opacity-100'
+                                                }`}
+                                            >
+                                                <img src={photo} alt="" className="h-full w-full object-cover" />
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <div className="border-t border-white/10 bg-[#171614] p-5 sm:p-6 text-white">
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div>
+                                            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-bronze-light">
+                                                {activeItem.category} · Space 0{activeImageIndex + 1} of 0{currentItems.length}
+                                            </span>
+                                            <h3 className="font-serif-display mt-1 text-xl font-medium sm:text-2xl">
+                                                {activeItem.title}
+                                            </h3>
+                                        </div>
+                                        <a
+                                            href="/contact"
+                                            className="hidden sm:inline-flex shrink-0 items-center rounded-full bg-bronze px-6 py-2.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-white hover:bg-bronze-dark transition-colors"
+                                        >
+                                            Inquire Look
+                                        </a>
+                                    </div>
+                                    {activeItem.subtitle && (
+                                        <p className="mt-2 text-xs leading-relaxed text-white/70 sm:text-sm">
+                                            {activeItem.subtitle}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
-                            {currentItems[activeImageIndex].subtitle && (
-                                <p className="mt-2 text-xs leading-relaxed text-white/70 sm:text-sm">
-                                    {currentItems[activeImageIndex].subtitle}
-                                </p>
-                            )}
-                        </div>
-                    </div>
+                        );
+                    })()}
                 </div>
             )}
         </PublicLayout>

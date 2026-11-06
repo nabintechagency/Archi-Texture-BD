@@ -34,6 +34,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'adminOrderCount' => \App\Models\Order::count(),
             'settings' => \App\Models\Setting::all()->keyBy('key')->map(fn ($s) => $s->value)->toArray(),
             'sharedProductCategories' => \App\Models\Product::whereNotNull('category')
                 ->where('category', '!=', '')

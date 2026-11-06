@@ -311,8 +311,8 @@ export default function SettingsIndex({ settings = [] }) {
     };
 
     return (
-        <AdminLayout title="Site, Notice & Contact Settings">
-            <Head title="Notice Bar, About & Contact Settings — Admin" />
+        <AdminLayout title="Site Settings">
+            <Head title="Site Settings — Admin" />
 
             <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-5xl mx-auto">
                 {/* Header */}
@@ -326,7 +326,7 @@ export default function SettingsIndex({ settings = [] }) {
                             <span className="text-xs font-medium text-slate-500">Live Website Sync</span>
                         </div>
                         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                            Notice Bar, Contact & Site Settings
+                            Site Settings
                         </h1>
                         <p className="text-xs sm:text-sm text-slate-500 mt-1">
                             Directly edit top announcement banner text, About Us story, design team, contact info, and showroom location.

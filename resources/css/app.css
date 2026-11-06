@@ -91,6 +91,14 @@
     @apply text-[11px] md:text-xs font-semibold uppercase tracking-[0.22em] text-[#A98952];
   }
 
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   .link-underline {
     background-image: linear-gradient(currentColor, currentColor);
     background-size: 0% 1px;
@@ -355,4 +363,20 @@
 
 .animate-hero-breeze {
   animation: hero-wind-breeze 14s ease-in-out infinite;
+}
+
+@media print {
+  @page {
+    margin: 1.5cm;
+    size: auto;
+  }
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  header, nav, aside, .print\:hidden {
+    display: none !important;
+  }
 }

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['name', 'email', 'subject', 'message', 'is_read', 'read_at'])]
+#[Fillable(['name', 'email', 'phone', 'subject', 'message', 'is_read', 'read_at'])]
 class Message extends Model
 {
     protected function casts(): array
