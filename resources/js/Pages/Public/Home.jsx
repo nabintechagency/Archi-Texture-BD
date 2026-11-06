@@ -40,8 +40,8 @@ const GALLERY = {
     ],
     Dining: [
         'https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=900&q=80',
-        'https://images.unsplash.com/photo-1615968679312-9b7ed9f04e79?auto=format&fit=crop&w=900&q=80',
-        'https://images.unsplash.com/photo-1595514535215-9a5e0e8e04be?auto=format&fit=crop&w=900&q=80',
+        'https://images.unsplash.com/photo-1632210826643-9ff7e84be2f9?auto=format&fit=crop&w=900&q=80',
+        'https://images.unsplash.com/photo-1634547588713-edd93045b9f1?auto=format&fit=crop&w=900&q=80',
     ],
 };
 

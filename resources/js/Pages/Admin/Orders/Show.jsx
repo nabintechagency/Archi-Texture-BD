@@ -441,15 +441,6 @@ export default function OrderShow({ order }) {
                                         {paymentMethod}
                                     </span>
                                 </div>
-
-                                {order.notes && (
-                                    <div className="border-t border-slate-100 pt-3 print:border-black/20">
-                                        <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Customer Special Instructions</p>
-                                        <p className="text-slate-700 mt-1 italic bg-amber-50/60 p-3 rounded-xl border border-amber-200/80 leading-relaxed">
-                                            "{order.notes}"
-                                        </p>
-                                    </div>
-                                )}
                             </div>
                         </div>
 

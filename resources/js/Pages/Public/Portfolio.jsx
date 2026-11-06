@@ -111,15 +111,15 @@ const FALLBACK_GALLERY = [
     },
     {
         category: 'Dining',
-        src: 'https://images.unsplash.com/photo-1615968679312-9b7ed9f04e79?auto=format&fit=crop&w=1200&q=80',
-        title: 'Casual Light-Filled Breakfast Nook',
-        subtitle: 'Custom curved banquette upholstered in stain-resistant performance linen.',
+        src: 'https://images.unsplash.com/photo-1632210826643-9ff7e84be2f9?auto=format&fit=crop&w=1200&q=80',
+        title: 'Contemporary Light-Filled Dining Room',
+        subtitle: 'Curated modern dining suite with bespoke natural wood table, sculptural lighting, and upholstered seating.',
     },
     {
         category: 'Dining',
-        src: 'https://images.unsplash.com/photo-1595514535215-9a5e0e8e04be?auto=format&fit=crop&w=1200&q=80',
+        src: 'https://images.unsplash.com/photo-1634547588713-edd93045b9f1?auto=format&fit=crop&w=1200&q=80',
         title: 'Warm Bronze Entertaining Space',
-        subtitle: 'Integrated wine storage wall, fluted bronze credenza, and velvet dining chairs.',
+        subtitle: 'Integrated architectural dining room with floor-to-ceiling windows, sculptural centerpiece, and designer dining chairs.',
     },
 ];
 
